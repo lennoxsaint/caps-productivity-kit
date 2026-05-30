@@ -66,5 +66,10 @@ Return:
 - What was verified.
 - What is still risky or blocked.
 - Where the user should look next.
+- `public_repo_sync_recommendation: yes/no` when the work changes reusable CAPS operating patterns.
+
+If `public_repo_sync_recommendation` is `yes`, name the reusable pattern and the
+exact public kit files you recommend updating. Do not edit, commit, or push a
+public kit unless the user explicitly approves that sync.
 
 Keep it short enough that a busy founder will actually read it.

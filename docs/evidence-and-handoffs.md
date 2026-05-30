@@ -64,3 +64,20 @@ Next gate: user or maintainer provides credential through the approved secret ma
 ```
 
 Never turn a local draft, queue row, or log line into a claim of live success.
+
+## Proof Rules
+
+Use the proof level that matches the claim:
+
+- A draft proves a draft exists.
+- A queue row proves something is queued.
+- A log line proves a process reported something.
+- A screenshot proves what was visible in that session.
+- A live route, API readback, external receipt, or user-facing surface proves live behavior.
+
+If the claim is about a public page, production data, sent message, payment,
+published post, or member/customer-facing state, verify that real surface before
+calling it done.
+
+Human approval gates still apply for external sends, production changes, secrets,
+payments, destructive filesystem or git actions, and launch unlocks.

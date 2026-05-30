@@ -46,6 +46,23 @@ Unpin or archive:
 - Old planning threads that no longer own a decision.
 - Duplicate or abandoned attempts.
 
+## Lane Lifecycle
+
+Use these states when reporting pinned work:
+
+| State | Meaning |
+| --- | --- |
+| `active` | The lane is being worked now or should keep progressing. |
+| `waiting` | The lane is clear, but paused on the user, a tool, or proof. |
+| `blocked` | The lane cannot continue without a named gate. |
+| `source/reference` | The thread is useful context, not active work. |
+| `unpin-ready` | The decision or output is captured and the thread can leave today view. |
+| `archived/done` | The work is closed and no sidebar attention is needed. |
+
+Do not keep source/reference threads pinned just because they are interesting.
+Pinning is an attention claim. If it is not today work, capture the useful
+context and recommend unpinning.
+
 ## Why It Matters
 
 Codex work gets messy when every thread is named like a diary entry. CAPS names make the action visible before you open the tab.

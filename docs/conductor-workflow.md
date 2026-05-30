@@ -41,6 +41,23 @@ Use workers for independent lanes:
 
 Do not create workers for tiny tasks. Coordination has a cost.
 
+Route to existing active lanes before creating new ones. A pinned worker thread
+should own a bounded outcome, not a vague topic. If an existing lane already owns
+the repo, product area, or proof path, continue that lane instead of starting a
+duplicate.
+
+New lanes need:
+
+- A clear outcome.
+- The right workspace or repo.
+- A stop condition.
+- An evidence contract.
+- An unpin rule.
+
+When the conductor is in a hold state, do not create new threads unless the user
+explicitly asks for that. Keep routing, status, and proof work inside the
+existing pinned lanes.
+
 ## 4. Keep Proof
 
 Record:
@@ -50,6 +67,21 @@ Record:
 - Screenshots or route proof
 - PR, deploy, or release IDs
 - Blockers and exact error text
+
+Morning backfeed should name:
+
+- Active lanes
+- Blockers
+- Highest-leverage next action
+- Unpin candidates
+
+Evening backfeed should name:
+
+- Shipped work
+- Slipped work
+- Still-active lanes
+- Waiting on the user
+- Waiting on tools or proof
 
 ## 5. Close The Loop
 
