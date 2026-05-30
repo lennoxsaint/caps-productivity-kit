@@ -13,6 +13,7 @@ This kit is intentionally plain. No SaaS. No dashboard. No magic. Clone it, run 
 - Worker-thread prompts for implementation, research, QA, docs, and review lanes
 - Naming and pinning conventions for keeping active work findable
 - A setup guide for new workspaces
+- Optional cohort/product/team packs
 - Example workflows you can copy
 - A small installer that copies the kit into an existing repo
 
@@ -31,6 +32,12 @@ Install CAPS into a project:
 ./install.sh /path/to/your/project
 ```
 
+Install CAPS with a specific public-safe pack:
+
+```bash
+./install.sh /path/to/your/project --pack full-circle-5
+```
+
 The installer creates:
 
 ```text
@@ -40,6 +47,7 @@ AGENTS.md
   templates/
   docs/
   examples/
+  packs/
 ```
 
 Then open your project in Codex and start a conductor thread with:
@@ -56,6 +64,8 @@ CAPS has three layers:
 1. `AGENTS.md` tells Codex how to behave in the workspace.
 2. The conductor thread owns planning, routing, evidence, and final decisions.
 3. Worker threads handle bounded lanes such as implementation, QA, docs, research, or review.
+
+Optional packs add a fourth layer: reusable setup material for a cohort, product, team, or launch shape. Packs can include lane templates, prompt schedules, skill manifests, and setup docs. They must stay public-safe: no secrets, no member data, no private thread IDs, and no proprietary launch proof unless that material has been explicitly cleared for publication.
 
 The point is not to create bureaucracy. The point is to make the next action obvious, preserve proof, and avoid losing work in a pile of anonymous chat tabs.
 
@@ -97,7 +107,12 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 │   ├── setup-guide.md
 │   ├── naming-and-pinning.md
 │   ├── conductor-workflow.md
-│   └── evidence-and-handoffs.md
+│   ├── evidence-and-handoffs.md
+│   └── packs.md
+├── packs/
+│   ├── README.md
+│   ├── _template/
+│   └── full-circle-5/
 └── examples/
     ├── feature-build/
     └── release-check/
@@ -114,6 +129,18 @@ After installing, edit your project `AGENTS.md`:
 - Add the definition of done for your product.
 
 Keep global rules stable. Keep project rules local. Keep reusable prompts in `.caps/prompts`.
+
+## Packs
+
+Packs live under `packs/<pack-name>/`. A pack can define:
+
+- `pack.yaml` for metadata and safety status
+- `setup.md` for install and customization steps
+- `prompt-schedule.md` for when to use conductor and worker prompts
+- `skill-manifest.md` for optional skills or capabilities
+- `lanes/` for reusable conductor and worker lane templates
+
+Packs do not automatically create, pin, or rename Codex threads. The kit can provide prompts, checklists, and scripts, but app-level pinning or thread automation depends on what the active Codex runtime exposes.
 
 ## Verification
 

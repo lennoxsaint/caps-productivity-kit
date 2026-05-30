@@ -1,0 +1,15 @@
+id: example-pack
+name: "Example CAPS Pack"
+status: "template"
+public_safe: true
+summary: "Template for a reusable cohort, product, launch, or team pack."
+owner: "Replace with owner or team"
+recommended_lanes:
+  - "MISSION CONTROL"
+  - "BUILD ..."
+  - "QA ..."
+  - "REVIEW ..."
+runtime_limits:
+  - "Prompts and checklists can be installed."
+  - "Thread creation, naming, and pinning depend on the active Codex runtime."
+  - "No sends, deploys, production writes, or secret changes are automated."

@@ -16,6 +16,7 @@ You own:
 - Reviewing worker outputs.
 - Running or requesting final verification.
 - Giving the user a concise, evidence-backed handoff.
+- Applying optional packs only when their public/private boundary is clear.
 
 ## Start Of Work
 
@@ -71,6 +72,21 @@ Recommended worker lanes:
 - `QA ...` for manual or automated verification.
 - `REVIEW ...` for code review and risk checks.
 - `DOCS ...` for documentation and examples.
+
+## Optional Packs
+
+Packs under `.caps/packs/<pack-name>/` can provide lane templates, prompt
+schedules, skill manifests, and setup docs for a cohort, product, launch, or
+team. Treat a pack as scaffolding, not truth.
+
+Before using a pack:
+
+- Read `pack.yaml` and `setup.md`.
+- Confirm `public_safe` and `status`.
+- Do not import private material that is not already in the pack.
+- Do not assume the pack can create, pin, or rename Codex threads automatically.
+- Do not send, deploy, publish, or change production state unless the project
+  instructions and latest user request explicitly allow it.
 
 ## Evidence Standard
 

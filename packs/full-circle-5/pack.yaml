@@ -1,0 +1,20 @@
+id: full-circle-5
+name: "Full Circle 5.0 Public Placeholder Pack"
+status: "placeholder"
+public_safe: true
+summary: "Public-safe placeholder showing how a cohort launch pack can be structured without including private Full Circle materials."
+owner: "Pack maintainer"
+recommended_lanes:
+  - "MISSION CONTROL"
+  - "BUILD COHORT KIT"
+  - "QA MEMBER FLOW"
+  - "REVIEW PUBLIC SAFETY"
+runtime_limits:
+  - "This pack provides prompts, checklists, and lane shapes only."
+  - "It does not install pinned Codex threads automatically."
+  - "It does not send messages, publish content, deploy software, or modify production data."
+private_material_boundary:
+  - "Do not add member names."
+  - "Do not add private thread IDs."
+  - "Do not add paid cohort lesson content."
+  - "Do not add private Skool, calendar, payment, or launch-proof details."
