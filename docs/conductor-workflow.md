@@ -54,6 +54,22 @@ New lanes need:
 - An evidence contract.
 - An unpin rule.
 
+Every routed prompt must carry enough context for a cold worker thread. Include:
+
+- Source conductor thread and reason for routing.
+- The decision already made by the conductor.
+- Relevant conversation summary.
+- Target workspace and key files or live surfaces.
+- What is public-safe, private/local-only, or approval-gated.
+- What not to redo.
+- Exact outcome, output format, proof standard, and stop condition.
+- Whether the worker may edit files, inspect only, or return a plan.
+
+This applies when continuing existing threads and when creating new threads.
+Existing workers are not guaranteed to remember the conductor's latest reasoning.
+If the worker needs the context to avoid a bad assumption, put that context in
+the routed prompt.
+
 When the conductor is in a hold state, do not create new threads unless the user
 explicitly asks for that. Keep routing, status, and proof work inside the
 existing pinned lanes.

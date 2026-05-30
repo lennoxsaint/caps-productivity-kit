@@ -40,6 +40,30 @@ Use worker threads only when the work can be split safely. Give each worker:
 - Expected output format.
 - Stop conditions.
 
+### Context-Rich Routing Prompts
+
+When you route work to an existing worker thread or create a new one, do not send
+a thin instruction like "continue this" or "look at that". The receiving thread
+may have none of the conductor conversation in context.
+
+Every routed prompt should be self-contained enough for a cold worker:
+
+- Name the source conductor thread and why this work is being routed.
+- State the decision already made by the conductor.
+- Summarize the relevant conversation that created the assignment.
+- Name the target workspace, repo, files, dashboards, or proof artifacts.
+- Identify what is public-safe, private/local-only, or approval-gated.
+- Explain what the worker should not redo.
+- Define the exact outcome, output format, proof standard, and stop conditions.
+- Include whether the worker should edit files, only inspect, or return a plan.
+- Tell the worker to backfeed reusable CAPS pattern changes, blockers, proof
+  paths, and public-kit sync recommendations before commit, push, deploy, send,
+  publish, or unlock actions.
+
+Before sending, reread the prompt as if you were a fresh worker with no sidebar
+context. If the worker would need to ask "what is this about?", add the missing
+context packet.
+
 Recommended worker lanes:
 
 - `BUILD ...` for implementation.
