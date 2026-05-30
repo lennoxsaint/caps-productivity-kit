@@ -10,6 +10,7 @@ This pack intentionally contains:
 - Generic lane shapes.
 - Generic setup steps.
 - Generic prompt timing.
+- A reusable daily content heartbeat pattern.
 - Public-safety boundaries.
 
 This pack intentionally does not contain:
@@ -17,8 +18,17 @@ This pack intentionally does not contain:
 - Member names.
 - Private thread IDs.
 - Paid cohort lesson content.
-- Private Skool, calendar, payment, or launch proof.
+- Private community, calendar, payment, or launch proof.
 - Internal business details.
 
 If a private source inventory later classifies material as public-safe, add it
 through a separate reviewed change.
+
+## Daily Content Heartbeat
+
+The pack includes a public-safe `DAILY CONTENT REVIEW` lane for students who
+want a daily 8:00 local-time review packet from their own source library,
+brand notes, feedback ledger, and offer policy.
+
+This heartbeat prepares drafts and proof for review. It does not post, schedule,
+write to production databases, or install pinned threads automatically.

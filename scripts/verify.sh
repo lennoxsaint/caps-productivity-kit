@@ -32,8 +32,11 @@ required_files=(
   "packs/full-circle-5/setup.md"
   "packs/full-circle-5/prompt-schedule.md"
   "packs/full-circle-5/skill-manifest.md"
+  "packs/full-circle-5/docs/daily-content-heartbeat.md"
+  "packs/full-circle-5/automation/daily-content-heartbeat.toml"
   "packs/full-circle-5/lanes/mission-control.md"
   "packs/full-circle-5/lanes/build-lane.md"
+  "packs/full-circle-5/lanes/daily-content-review.md"
   "examples/feature-build/README.md"
   "examples/release-check/README.md"
 )

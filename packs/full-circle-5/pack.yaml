@@ -7,6 +7,7 @@ owner: "Pack maintainer"
 recommended_lanes:
   - "MISSION CONTROL"
   - "BUILD COHORT KIT"
+  - "DAILY CONTENT REVIEW"
   - "QA MEMBER FLOW"
   - "REVIEW PUBLIC SAFETY"
 runtime_limits:
@@ -17,4 +18,9 @@ private_material_boundary:
   - "Do not add member names."
   - "Do not add private thread IDs."
   - "Do not add paid cohort lesson content."
-  - "Do not add private Skool, calendar, payment, or launch-proof details."
+  - "Do not add private community, calendar, payment, or launch-proof details."
+daily_content_heartbeat:
+  status: "template"
+  default_local_time: "08:00"
+  lane_name: "DAILY CONTENT REVIEW"
+  requires_human_approval_before_external_scheduling: true

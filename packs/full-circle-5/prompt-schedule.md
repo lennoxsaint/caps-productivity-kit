@@ -16,6 +16,15 @@ This schedule is generic. Replace it only with public-safe material.
 - Keep source material public-safe.
 - Return files changed and verification output.
 
+## Daily Content Review
+
+- Run around 8:00 local time.
+- Read the student's source library, brand notes, feedback ledger, CTA policy,
+  and prior review artifacts.
+- Prepare a review packet with draft posts and validation output.
+- Keep the output in draft/review state until same-day human approval.
+- Do not post, schedule, publish, or write production data.
+
 ## QA Lane
 
 - Verify the user/member-facing flow in the target environment.

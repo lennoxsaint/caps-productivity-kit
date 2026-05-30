@@ -1,0 +1,49 @@
+# CAPS daily content review heartbeat template.
+# Copy this into your own automation system and replace every placeholder.
+# This file is documentation plus configuration shape; it does not run by itself.
+
+id = "daily-content-review"
+name = "Daily Content Review"
+lane = "DAILY CONTENT REVIEW"
+timezone = "<YOUR_LOCAL_TIMEZONE>"
+rrule = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=8;BYMINUTE=0;BYSECOND=0"
+mode = "prepare_review_only"
+
+[inputs]
+workspace_root = "<PATH_TO_YOUR_CONTENT_WORKSPACE>"
+source_library = "<PATH_TO_YOUR_SOURCE_LIBRARY_OR_CANDIDATE_RUN_DIR>"
+brand_notes = "<PATH_TO_YOUR_BRAND_DOCTRINE_OR_VOICE_NOTES>"
+feedback_ledger = "<PATH_TO_YOUR_FEEDBACK_LEDGER>"
+cta_policy = "<PATH_TO_YOUR_CTA_OR_OFFER_POLICY>"
+scheduling_tool = "<YOUR_SCHEDULING_TOOL_OR_NONE>"
+
+[command]
+description = "Prepare a daily review packet from your own source library."
+template = "python3 tools/daily_content_review.py prepare --run-dir <candidate-run-dir> --date <today-local-YYYY-MM-DD> --count 10 --clean-count 5 --cta-count 5"
+
+[approval]
+required_before_external_posting = true
+required_before_external_scheduling = true
+same_day_approval_required = true
+
+[safety]
+allow_external_posting = false
+allow_external_scheduling_without_approval = false
+allow_direct_production_database_writes = false
+allow_private_data_in_public_artifacts = false
+
+[proof]
+required = [
+  "command_and_exit_status",
+  "review_packet_path",
+  "validation_output",
+  "exact_draft_posts",
+  "source_library_or_run_dir",
+  "brand_or_feedback_files_read",
+  "exact_blockers"
+]
+not_live_proof = [
+  "draft_files",
+  "local_logs",
+  "queue_rows_without_live_readback"
+]
