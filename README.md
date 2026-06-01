@@ -12,6 +12,8 @@ This kit is intentionally plain. No SaaS. No dashboard. No magic. Clone it, run 
 - A conductor prompt for the main coordinating thread
 - Worker-thread prompts for implementation, research, QA, docs, and review lanes
 - Naming and pinning conventions for keeping active work findable
+- A read-first operator loop for "what did I miss?" triage
+- A proof-state matrix for drafts, queues, sends, publishing, deploys, and live verification
 - A setup guide for new workspaces
 - Optional cohort/product/team packs
 - Example workflows you can copy
@@ -107,6 +109,7 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 │   ├── setup-guide.md
 │   ├── naming-and-pinning.md
 │   ├── conductor-workflow.md
+│   ├── operator-loop.md
 │   ├── evidence-and-handoffs.md
 │   └── packs.md
 ├── packs/

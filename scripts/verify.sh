@@ -18,6 +18,7 @@ required_files=(
   "docs/setup-guide.md"
   "docs/naming-and-pinning.md"
   "docs/conductor-workflow.md"
+  "docs/operator-loop.md"
   "docs/evidence-and-handoffs.md"
   "docs/packs.md"
   "packs/README.md"

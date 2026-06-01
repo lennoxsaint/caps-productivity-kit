@@ -75,6 +75,19 @@ Use the proof level that matches the claim:
 - A screenshot proves what was visible in that session.
 - A live route, API readback, external receipt, or user-facing surface proves live behavior.
 
+Use these labels when the distinction matters:
+
+- `read`
+- `draft`
+- `queued`
+- `scheduled`
+- `sent`
+- `published`
+- `merged`
+- `deployed`
+- `live-verified`
+- `blocked`
+
 If the claim is about a public page, production data, sent message, payment,
 published post, or member/customer-facing state, verify that real surface before
 calling it done.

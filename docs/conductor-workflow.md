@@ -90,6 +90,7 @@ Morning backfeed should name:
 - Blockers
 - Highest-leverage next action
 - Unpin candidates
+- What the operator loop found since the last report
 
 Evening backfeed should name:
 
@@ -98,6 +99,12 @@ Evening backfeed should name:
 - Still-active lanes
 - Waiting on the user
 - Waiting on tools or proof
+- Proof states that changed
+
+For cross-surface triage, use `docs/operator-loop.md`. Start read-only, label
+proof states, and stop before external sends, publishing, payments, destructive
+actions, production writes, merges, or deploys unless the current project
+instructions and latest user request clearly authorize them.
 
 ## 5. Close The Loop
 
