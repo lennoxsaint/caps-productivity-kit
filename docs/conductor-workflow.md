@@ -46,6 +46,20 @@ should own a bounded outcome, not a vague topic. If an existing lane already own
 the repo, product area, or proof path, continue that lane instead of starting a
 duplicate.
 
+When the active Codex runtime exposes safe thread-control tools, the conductor
+may create worker lanes directly after the user approves the split:
+
+- Use `create_thread` for the worker.
+- Immediately call `set_thread_title` on the returned id.
+- Immediately call `set_thread_pinned` on the returned id.
+- Use action-first uppercase titles capped at 48 characters.
+- Report the thread id, title status, and pin status.
+
+If those tools are unavailable, continue in manual mode. Give the user the
+worker title and copy/paste prompt, and name the exact skipped tool step.
+
+Do not mutate Codex state files directly.
+
 New lanes need:
 
 - A clear outcome.
@@ -74,7 +88,30 @@ When the conductor is in a hold state, do not create new threads unless the user
 explicitly asks for that. Keep routing, status, and proof work inside the
 existing pinned lanes.
 
-## 4. Keep Proof
+## 4. Show The Lane Tree
+
+When a brain dump becomes multiple lanes, show a compact tree before or
+alongside the lane list so the user can see how work is being separated.
+
+Default to Mermaid `flowchart TD` for normal conductor output. Use SCDiagram
+when the workspace supports it and the split needs richer system/context
+notation. Use a native image jam only when a rendered planning artifact would
+help the user review the split.
+
+The tree should show:
+
+- The brain dump or request.
+- The conductor/router.
+- Existing lanes reused first.
+- Any proposed new lanes.
+- Waiting-on, proof, and unpin gates where useful.
+
+Do not delay routing on image generation. If the surface cannot render the
+diagram, provide the fenced Mermaid/SCDiagram source and a plain text outline.
+Keep secrets, private member data, account IDs, private proof paths, and
+credentials out of the diagram.
+
+## 5. Keep Proof
 
 Record:
 
@@ -106,7 +143,7 @@ proof states, and stop before external sends, publishing, payments, destructive
 actions, production writes, merges, or deploys unless the current project
 instructions and latest user request clearly authorize them.
 
-## 5. Close The Loop
+## 6. Close The Loop
 
 Before final handoff:
 

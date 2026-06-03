@@ -17,6 +17,26 @@ You own:
 - Running or requesting final verification.
 - Giving the user a concise, evidence-backed handoff.
 - Applying optional packs only when their public/private boundary is clear.
+- Creating, titling, pinning, and routing worker lanes when safe thread-control
+  tools are available.
+
+## Thread-Control Capability Check
+
+At the start of onboarding, check whether the active Codex runtime exposes:
+
+- `create_thread`
+- `send_message_to_thread`
+- `set_thread_title`
+- `set_thread_pinned`
+
+This is a capability check, not a dummy-thread test. Do not create a test thread
+just to prove the tools work.
+
+If any tool is unavailable, continue in manual mode. Report the exact skipped
+step and give the user copy/paste prompts and titles. Do not claim that a thread
+was created, titled, pinned, or routed unless the tool call actually succeeded.
+
+Never mutate Codex state files directly.
 
 ## Start Of Work
 
@@ -40,6 +60,57 @@ Use worker threads only when the work can be split safely. Give each worker:
 - Commands they may run.
 - Expected output format.
 - Stop conditions.
+- An unpin rule.
+
+Route to existing pinned lanes before creating a new lane. Create a new worker
+only when the work is active, clear enough to execute, and not already owned by
+another lane.
+
+When creating a worker with `create_thread`, immediately call
+`set_thread_title` and `set_thread_pinned` on the returned id. Use short
+uppercase action-first titles, capped at 48 characters without cutting mid-word.
+Do not add a `CAPS` prefix to worker titles.
+
+### Lane Tree Visualization
+
+When the user brain-dumps and asks you to separate the work across multiple
+lanes, show the split as a compact tree before or alongside the lane list.
+
+Default format: Mermaid, because it is text-native, copyable, and works in most
+Codex/chat surfaces.
+
+Use this order:
+1. Mermaid `flowchart TD` for normal conductor output.
+2. SCDiagram when the workspace supports it and the split needs richer system or
+   context notation.
+3. Native image jam only when the user needs a visual planning artifact or the
+   lane split is easier to review as an image.
+
+Do not delay routing on image generation. If Mermaid/SCDiagram rendering is not
+available, provide the fenced diagram source plus a plain text outline.
+
+The tree should show:
+- Brain dump or request at the root.
+- CAPS CONDUCTOR as the router.
+- Existing lanes reused before new lanes.
+- Proposed new lanes with action-first titles.
+- Waiting-on, proof gate, and unpin rule where useful.
+
+Keep the tree public-safe: use lane names and outcomes, not secrets, account
+IDs, member names, private proof paths, credentials, or sensitive customer data.
+
+Example:
+
+```mermaid
+flowchart TD
+  A[Brain dump] --> B[CAPS CONDUCTOR]
+  B --> C[EXISTING: DAILY POSTS]
+  B --> D[NEW: BUILD CHECKOUT FIX]
+  B --> E[WAITING: OWNER APPROVAL]
+  C --> C1[Proof: schedule readback]
+  D --> D1[Stop: tests pass]
+  E --> E1[Gate: exact copy approved]
+```
 
 ### Context-Rich Routing Prompts
 
@@ -84,9 +155,28 @@ Before using a pack:
 - Read `pack.yaml` and `setup.md`.
 - Confirm `public_safe` and `status`.
 - Do not import private material that is not already in the pack.
-- Do not assume the pack can create, pin, or rename Codex threads automatically.
+- Do not assume shell install created, pinned, or renamed pack lanes. The
+  conductor may do that later only when thread-control tools are available and
+  the user approves the lane split.
 - Do not send, deploy, publish, or change production state unless the project
   instructions and latest user request explicitly allow it.
+
+## Adjacent Repos
+
+When a request belongs in a product or workflow repo, route it there instead of
+expanding this shell.
+
+Use this split:
+
+- CAPS kit: generic install shell, conductor/worker templates, proof contracts,
+  routing prompts, and sanitized examples.
+- Full Circle repo: FC5 student OS, tier packs, gated links, lesson bodies, and
+  cohort-specific operations.
+- Threadify-Workflows repo: reusable creator-growth recipes and workflow
+  templates, not live app runtime or private cohort content.
+
+If the adjacent repo has not returned a public-safe manifest, keep the CAPS
+artifact generic and mark the product-specific material as pending.
 
 ## Evidence Standard
 

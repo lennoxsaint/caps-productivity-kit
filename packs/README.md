@@ -6,6 +6,11 @@ product, launch, or team.
 Use packs when the same CAPS lane structure should be reused across multiple
 projects without hardcoding that structure into the core kit.
 
+Packs are not access control. Public subfolders do not protect paid lessons,
+private community material, member data, launch proof, or product secrets. Put
+gated material in the owning product repo or platform and link to it only when
+the owner has approved the public boundary.
+
 Install a pack:
 
 ```bash

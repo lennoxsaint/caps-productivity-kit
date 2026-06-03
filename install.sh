@@ -4,16 +4,17 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  ./install.sh /path/to/project [--pack pack-name]
+  ./install.sh /path/to/project [--pack pack-name] [--no-open] [--no-agents-update]
 
 Copies CAPS templates into an existing project.
 
 What it writes:
-  AGENTS.md       if one does not already exist
-  .caps/          prompts, templates, docs, examples, and selected packs
+  AGENTS.md       created or updated with a managed CAPS block unless disabled
+  .caps/          prompts, templates, docs, examples, bootstrap, and selected packs
 
-Existing AGENTS.md files are not overwritten.
+Existing AGENTS.md files get a timestamped backup before managed block updates.
 Packs are copied only when requested with --pack.
+Codex Desktop is opened by default when the `codex` CLI is available.
 USAGE
 }
 
@@ -29,6 +30,8 @@ if [[ -z "$target" ]]; then
 fi
 
 pack_name=""
+open_codex=true
+update_agents=true
 shift || true
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
@@ -39,6 +42,14 @@ while [[ "$#" -gt 0 ]]; do
         exit 1
       fi
       shift 2
+      ;;
+    --no-open)
+      open_codex=false
+      shift
+      ;;
+    --no-agents-update)
+      update_agents=false
+      shift
       ;;
     *)
       echo "Unknown option: $1" >&2
@@ -74,6 +85,8 @@ copy_dir "$script_dir/prompts" "$caps_dir/prompts"
 copy_dir "$script_dir/templates" "$caps_dir/templates"
 copy_dir "$script_dir/docs" "$caps_dir/docs"
 copy_dir "$script_dir/examples" "$caps_dir/examples"
+mkdir -p "$caps_dir/bootstrap"
+cp "$script_dir/prompts/bootstrap-caps-conductor.md" "$caps_dir/bootstrap/start-caps-conductor.md"
 
 if [[ -n "$pack_name" ]]; then
   if [[ ! -d "$script_dir/packs/$pack_name" ]]; then
@@ -87,12 +100,88 @@ if [[ -n "$pack_name" ]]; then
   echo "Installed pack: $pack_name"
 fi
 
-if [[ -f "$target_dir/AGENTS.md" ]]; then
-  echo "Kept existing AGENTS.md"
-  echo "Suggested merge source: $caps_dir/templates/AGENTS.repo.md"
+managed_block_source="$script_dir/templates/AGENTS.caps-lane-factory.md"
+agents_file="$target_dir/AGENTS.md"
+
+update_managed_block() {
+  local file="$1"
+  local block_file="$2"
+  local tmp_file="$file.tmp.$$"
+  local start_marker="<!-- BEGIN CAPS MANAGED: lane-factory -->"
+  local end_marker="<!-- END CAPS MANAGED: lane-factory -->"
+
+  awk -v start="$start_marker" -v end="$end_marker" -v block_file="$block_file" '
+    BEGIN {
+      while ((getline line < block_file) > 0) {
+        block = block line "\n"
+      }
+      close(block_file)
+      in_block = 0
+      replaced = 0
+    }
+    $0 == start {
+      if (!replaced) {
+        printf "%s", block
+        replaced = 1
+      }
+      in_block = 1
+      next
+    }
+    $0 == end {
+      in_block = 0
+      next
+    }
+    !in_block {
+      print
+    }
+    END {
+      if (!replaced) {
+        if (NR > 0) {
+          print ""
+        }
+        printf "%s", block
+      }
+    }
+  ' "$file" > "$tmp_file"
+
+  mv "$tmp_file" "$file"
+}
+
+if [[ "$update_agents" == true ]]; then
+  if [[ -f "$agents_file" ]]; then
+    backup_file="$target_dir/AGENTS.md.backup-$(date +%Y%m%d-%H%M%S)"
+    cp "$agents_file" "$backup_file"
+    update_managed_block "$agents_file" "$managed_block_source"
+    echo "Updated AGENTS.md managed CAPS block"
+    echo "Backup: $backup_file"
+  else
+    cp "$script_dir/templates/AGENTS.repo.md" "$agents_file"
+    update_managed_block "$agents_file" "$managed_block_source"
+    echo "Created AGENTS.md with managed CAPS block"
+  fi
 else
-  cp "$script_dir/templates/AGENTS.repo.md" "$target_dir/AGENTS.md"
-  echo "Created AGENTS.md"
+  echo "Skipped AGENTS.md update"
+  echo "Suggested manual sources:"
+  echo "  $caps_dir/templates/AGENTS.repo.md"
+  echo "  $caps_dir/templates/AGENTS.caps-lane-factory.md"
+fi
+
+if [[ "$open_codex" == true ]]; then
+  if command -v codex >/dev/null 2>&1; then
+    if codex app "$target_dir" >/dev/null 2>&1; then
+      echo "Opened Codex Desktop for: $target_dir"
+    else
+      echo "Could not open Codex Desktop automatically. Run: codex app \"$target_dir\"" >&2
+    fi
+  else
+    echo "Codex CLI not found. Open this project in Codex Desktop manually." >&2
+  fi
+fi
+
+if [[ "$update_agents" == true ]]; then
+  agents_next_step="Review $target_dir/AGENTS.md and fill in real project commands and safety rules."
+else
+  agents_next_step="Merge .caps/templates/AGENTS.repo.md and .caps/templates/AGENTS.caps-lane-factory.md into your project instructions when ready."
 fi
 
 cat <<EOF
@@ -101,11 +190,14 @@ CAPS installed in:
   $target_dir
 
 Next:
-  1. Edit $target_dir/AGENTS.md with your real project commands and safety rules.
-  2. Start a Codex conductor thread with:
+  1. $agents_next_step
+  2. In Codex, run the bootstrap prompt:
 
-     Use .caps/prompts/conductor.md as the operating prompt for this workspace.
-     Read AGENTS.md first, then help me plan and execute the next project slice.
+     Read .caps/bootstrap/start-caps-conductor.md and execute it.
+
+     The bootstrap creates and pins CAPS CONDUCTOR when the active Codex runtime
+     exposes safe thread-control tools. If those tools are unavailable, it gives
+     exact manual-mode steps instead of pretending automation worked.
 EOF
 
 if [[ -n "$pack_name" ]]; then
@@ -114,7 +206,8 @@ if [[ -n "$pack_name" ]]; then
 
      .caps/packs/$pack_name/setup.md
 
-     Packs provide prompts and checklists only. They do not automatically create,
-     pin, rename, send, deploy, or publish anything.
+     Packs provide prompts, lane templates, and checklists. Shell install does
+     not create, pin, rename, send, deploy, or publish anything; the Conductor
+     may use safe thread-control tools later when your Codex runtime exposes them.
 EOF
 fi

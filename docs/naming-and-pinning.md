@@ -36,6 +36,7 @@ RESEARCH OPENAI API
 
 Pin:
 
+- `CAPS CONDUCTOR`, the first conductor thread created by the bootstrap.
 - The current conductor thread.
 - Active worker threads.
 - Release or incident threads that are still open.
@@ -62,6 +63,11 @@ Use these states when reporting pinned work:
 Do not keep source/reference threads pinned just because they are interesting.
 Pinning is an attention claim. If it is not today work, capture the useful
 context and recommend unpinning.
+
+When thread-control tools are available, the conductor should title and pin a
+new worker immediately after `create_thread` returns an id. If title or pin
+mutation is unavailable, report the exact skipped step and give manual
+instructions.
 
 ## Why It Matters
 

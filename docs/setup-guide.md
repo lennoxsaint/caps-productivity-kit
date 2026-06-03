@@ -18,9 +18,25 @@ From this kit:
 
 The installer copies prompts, templates, docs, and examples into `.caps/`.
 
-If your project does not already have `AGENTS.md`, the installer creates one from `templates/AGENTS.repo.md`.
+It also writes `.caps/bootstrap/start-caps-conductor.md`, the prompt that starts
+the first `CAPS CONDUCTOR` lane inside Codex.
 
-If your project already has `AGENTS.md`, the installer leaves it alone and places the template at `.caps/templates/AGENTS.repo.md` for manual merging.
+If your project does not already have `AGENTS.md`, the installer creates one
+from `templates/AGENTS.repo.md` and adds the managed CAPS lane-factory block.
+
+If your project already has `AGENTS.md`, the installer creates a timestamped
+backup and appends or updates one managed CAPS lane-factory block. Rerunning the
+installer updates that block without duplicating it.
+
+Use these flags when needed:
+
+```bash
+./install.sh /path/to/your/project --no-open
+./install.sh /path/to/your/project --no-agents-update
+```
+
+`--no-open` skips opening Codex Desktop. `--no-agents-update` leaves
+`AGENTS.md` untouched and installs the merge sources under `.caps/templates/`.
 
 ## Customize
 
@@ -37,16 +53,18 @@ Open your project `AGENTS.md` and replace every bracketed placeholder:
 
 Do not skip the commands. Agents need exact commands or they will guess.
 
-## Start A Conductor Thread
+## Start CAPS Conductor
 
-In Codex, start a new thread:
+The installer opens Codex Desktop by default when the `codex` CLI is available.
+In Codex, run:
 
 ```text
-Use .caps/prompts/conductor.md as the operating prompt for this workspace.
-Read AGENTS.md first, then help me plan and execute the next project slice.
+Read .caps/bootstrap/start-caps-conductor.md and execute it.
 ```
 
-Name it with the convention in `.caps/docs/naming-and-pinning.md`.
+The bootstrap creates one project-scoped thread titled `CAPS CONDUCTOR` and pins
+it when the runtime exposes safe thread-control tools. If the tools are missing,
+it reports the exact skipped step and gives manual-mode copy/paste instructions.
 
 ## Add Workers
 
@@ -63,6 +81,8 @@ DOCS API QUICKSTART
 ```
 
 Give each worker a prompt from `.caps/prompts/workers/` plus a narrow assignment.
+When thread-control tools are available, `CAPS CONDUCTOR` can create, title, and
+pin those workers after you approve the proposed lane split.
 
 ## Verify The Kit
 
@@ -76,6 +96,7 @@ From your installed project, confirm:
 
 ```bash
 test -f AGENTS.md
+test -f .caps/bootstrap/start-caps-conductor.md
 test -f .caps/prompts/conductor.md
 test -f .caps/prompts/workers/implementation.md
 ```

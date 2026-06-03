@@ -70,10 +70,10 @@ Packs can provide:
 - Checklists.
 - Skill or capability manifests.
 
-Packs cannot guarantee automatic thread creation, pinning, renaming, or tab
-installation. Those actions depend on the active Codex runtime and exposed
-tools. If the runtime exposes safe thread-management tools, a conductor may use
-them only within the current project instructions and user-approved boundaries.
+Packs do not create, pin, rename, or install tabs from shell install. Those
+actions depend on the active Codex runtime and exposed tools. If the runtime
+exposes safe thread-management tools, a conductor may use them later within the
+current project instructions and user-approved boundaries.
 
 ## Install
 
