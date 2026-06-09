@@ -34,7 +34,7 @@ This schedule is generic. Replace it only with public-safe material.
 ## Review Lane
 
 - Check for private material before any public sync.
-- Check that no pack claims automatic thread pinning unless runtime tools prove it.
+- Check that no pack claims shell install created or pinned threads.
 - Recommend whether the public kit should receive the pattern.
 
 ## Close

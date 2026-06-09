@@ -2,7 +2,7 @@ id: full-circle-5
 name: "Full Circle 5.0 Public Placeholder Pack"
 status: "placeholder"
 public_safe: true
-summary: "Public-safe placeholder showing how a cohort launch pack can be structured without including private Full Circle materials."
+summary: "Public-safe shell placeholder showing how CAPS can link to a Full Circle-owned FC5 student OS without containing the course."
 owner: "Pack maintainer"
 recommended_lanes:
   - "MISSION CONTROL"
@@ -12,7 +12,8 @@ recommended_lanes:
   - "REVIEW PUBLIC SAFETY"
 runtime_limits:
   - "This pack provides prompts, checklists, and lane shapes only."
-  - "It does not install pinned Codex threads automatically."
+  - "Shell install does not create, title, or pin Codex threads."
+  - "A CAPS Conductor may manage lanes later when safe thread-control tools are available."
   - "It does not send messages, publish content, deploy software, or modify production data."
 private_material_boundary:
   - "Do not add member names."
@@ -24,3 +25,7 @@ daily_content_heartbeat:
   default_local_time: "08:00"
   lane_name: "DAILY CONTENT REVIEW"
   requires_human_approval_before_external_scheduling: true
+adjacent_repo_boundary:
+  owning_repo: "Full Circle"
+  caps_role: "generic shell and link/template placeholder"
+  not_caps_role: "paid access, tier gating, lesson bodies, private proof, member data, or course operations"

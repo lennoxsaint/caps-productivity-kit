@@ -71,5 +71,6 @@ row alone.
 ## Runtime Limits
 
 This kit can install prompts, templates, checklists, and example automation
-metadata. It cannot guarantee automatic Codex thread creation, pinning, or
-renaming unless the active Codex runtime exposes safe tools for those actions.
+metadata. Shell install does not create, title, or pin Codex threads. A CAPS
+Conductor may do that later when the active Codex runtime exposes safe tools for
+those actions.

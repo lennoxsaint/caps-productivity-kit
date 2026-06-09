@@ -41,6 +41,11 @@ Use workers for independent lanes:
 
 Do not create workers for tiny tasks. Coordination has a cost.
 
+For complex, proof-sensitive, or multi-surface work, first decide whether the
+task needs a dynamic harness. A harness is a temporary task organization with
+explicit evidence sources, split roles, verifier rubrics, stop conditions, and
+proof-state targets. See `docs/dynamic-harnesses.md`.
+
 Route to existing active lanes before creating new ones. A pinned worker thread
 should own a bounded outcome, not a vague topic. If an existing lane already owns
 the repo, product area, or proof path, continue that lane instead of starting a

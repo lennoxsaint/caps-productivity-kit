@@ -11,9 +11,9 @@ notes, feedback ledger, and CTA policy.
 
 Run around 8:00 local time.
 
-The pack can provide a heartbeat template, but it cannot guarantee automatic
-thread creation, naming, or pinning unless the active Codex runtime exposes safe
-tools for those actions.
+The pack can provide a heartbeat template. Shell install does not create, title,
+or pin this lane. A CAPS Conductor may do that later when the active Codex
+runtime exposes safe tools for those actions.
 
 ## Required Inputs
 

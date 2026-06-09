@@ -65,6 +65,15 @@ Next gate: user or maintainer provides credential through the approved secret ma
 
 Never turn a local draft, queue row, or log line into a claim of live success.
 
+For harnessed work, add the harness decision and verifier result:
+
+```text
+Harness: used | skipped
+Reason: ...
+Verifier: passed | failed | skipped
+Proof target: draft | queued | scheduled | sent | published | merged | deployed | live-verified | blocked
+```
+
 ## Proof Rules
 
 Use the proof level that matches the claim:

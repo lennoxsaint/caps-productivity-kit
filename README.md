@@ -33,6 +33,7 @@ It is not:
 - A Codex bootstrap prompt for creating and pinning `CAPS CONDUCTOR`
 - A conductor prompt for the main coordinating thread
 - Lane-tree diagrams for brain-dump routing
+- Dynamic harness templates for complex, proof-sensitive work
 - Worker-thread prompts for implementation, research, QA, docs, and review lanes
 - Naming and pinning conventions for keeping active work findable
 - A read-first operator loop for "what did I miss?" triage
@@ -155,6 +156,7 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 │   ├── naming-and-pinning.md
 │   ├── conductor-workflow.md
 │   ├── operator-loop.md
+│   ├── dynamic-harnesses.md
 │   ├── evidence-and-handoffs.md
 │   ├── adjacent-repos.md
 │   └── packs.md

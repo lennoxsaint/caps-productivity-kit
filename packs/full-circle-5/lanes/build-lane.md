@@ -19,7 +19,7 @@ Build one installable or copyable artifact for the cohort operating system.
 - Private thread IDs.
 - Paid cohort lesson content.
 - Private community, payment, calendar, or launch-proof details.
-- Claims that Codex can automatically pin threads unless the runtime proves it.
+- Claims that shell install created or pinned Codex threads.
 
 ## Output
 

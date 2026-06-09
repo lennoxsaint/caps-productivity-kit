@@ -1,6 +1,8 @@
 # Full Circle 5.0 Placeholder Setup
 
-Use this pack as a generic cohort-launch scaffold.
+Use this pack as a generic cohort-launch shell. It can point to an approved
+Full Circle-owned student OS, but it does not contain paid FC5 access, tier
+gating, lesson bodies, private proof, or member data.
 
 ## Install
 
@@ -18,6 +20,9 @@ Confirm the target project has its own:
   communications.
 - Public/private inventory for any cohort-specific material.
 
+If FC5-specific material is needed, get it from the Full Circle owning repo or
+approved gated link. Do not add it to this public CAPS shell.
+
 ## Start Mission Control
 
 ```text
@@ -29,9 +34,9 @@ Do not import private cohort material unless it has been classified public-safe.
 
 ## Runtime Limit
 
-This pack cannot automatically create, pin, or rename Codex threads. It can
-provide the naming convention and prompts. Actual thread management depends on
-the active Codex runtime tools.
+Shell install does not create, pin, or rename Codex threads for this pack. The
+pack provides naming conventions and prompts. A CAPS Conductor may manage those
+threads later when the active Codex runtime exposes safe thread-control tools.
 
 ## Daily Content Review Heartbeat
 
