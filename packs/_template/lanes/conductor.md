@@ -13,6 +13,8 @@ duplicating effort.
 2. Read this pack's `pack.yaml` and `setup.md`.
 3. Name active lanes, blockers, and unpin candidates.
 4. Route only the next bounded outcome.
+5. Keep quick answers in this lane. For each worker, use the installed GPT-5.6
+   routing decision and authority envelope before creating the thread.
 
 ## Output
 

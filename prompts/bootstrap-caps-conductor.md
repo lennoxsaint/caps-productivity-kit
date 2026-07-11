@@ -21,7 +21,8 @@ Do not use local Codex state files or background automation as a workaround.
 
 ## If Tools Are Available
 
-1. Create a new thread in this same project/workspace.
+1. Create a new thread in this same project/workspace with model
+   `gpt-5.6-sol` and thinking `medium`.
 2. Use this initial prompt for the new thread:
 
 ```text
@@ -75,9 +76,10 @@ Proof standard:
 - Report files, commands, or live proof for worker outputs.
 ```
 
-3. Call `set_thread_title(threadId, "CAPS CONDUCTOR")` with the returned id.
-4. Call `set_thread_pinned(threadId, true)` with the returned id.
-5. In this bootstrap thread, report:
+3. Verify the returned thread was created with `gpt-5.6-sol` and `medium`.
+4. Call `set_thread_title(threadId, "CAPS CONDUCTOR")` with the returned id.
+5. Call `set_thread_pinned(threadId, true)` with the returned id.
+6. In this bootstrap thread, report:
    - conductor thread id,
    - title status,
    - pin status,

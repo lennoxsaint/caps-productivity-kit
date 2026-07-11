@@ -10,7 +10,7 @@ Copies CAPS templates into an existing project.
 
 What it writes:
   AGENTS.md       created or updated with a managed CAPS block unless disabled
-  .caps/          prompts, templates, docs, examples, bootstrap, and selected packs
+  .caps/          prompts, templates, docs, schemas, examples, bootstrap, and selected packs
 
 Existing AGENTS.md files get a timestamped backup before managed block updates.
 Packs are copied only when requested with --pack.
@@ -84,6 +84,7 @@ copy_dir() {
 copy_dir "$script_dir/prompts" "$caps_dir/prompts"
 copy_dir "$script_dir/templates" "$caps_dir/templates"
 copy_dir "$script_dir/docs" "$caps_dir/docs"
+copy_dir "$script_dir/schemas" "$caps_dir/schemas"
 copy_dir "$script_dir/examples" "$caps_dir/examples"
 mkdir -p "$caps_dir/bootstrap"
 cp "$script_dir/prompts/bootstrap-caps-conductor.md" "$caps_dir/bootstrap/start-caps-conductor.md"

@@ -32,6 +32,7 @@ It is not:
 - A lane-factory `AGENTS.md` managed block
 - A Codex bootstrap prompt for creating and pinning `CAPS CONDUCTOR`
 - A conductor prompt for the main coordinating thread
+- GPT-5.6 worker routing with explicit model, thinking, and authority envelopes
 - Lane-tree diagrams for brain-dump routing
 - Dynamic harness templates for complex, proof-sensitive work
 - Worker-thread prompts for implementation, research, QA, docs, and review lanes
@@ -136,7 +137,11 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 ├── README.md
 ├── install.sh
 ├── scripts/
+│   ├── verify-routing.py
 │   └── verify.sh
+├── schemas/
+│   └── routing-decision.schema.json
+├── CONTEXT.md
 ├── templates/
 │   ├── AGENTS.caps-lane-factory.md
 │   ├── AGENTS.global.md
@@ -155,6 +160,7 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 │   ├── setup-guide.md
 │   ├── naming-and-pinning.md
 │   ├── conductor-workflow.md
+│   ├── gpt-5-6-routing.md
 │   ├── operator-loop.md
 │   ├── dynamic-harnesses.md
 │   ├── evidence-and-handoffs.md
@@ -219,6 +225,8 @@ Run:
 ```
 
 This checks that required files exist, prompts are present, and the installer is executable.
+It also validates public routing schema examples and the deterministic routing
+matrix without third-party dependencies.
 
 ## License
 

@@ -1,0 +1,14 @@
+{
+  "task_class": "research_strategy",
+  "model": "gpt-5.6-sol",
+  "thinking": "max",
+  "rationale": "The decision is unusually difficult, high value, and cannot be decomposed safely.",
+  "quality_gate": "The recommendation resolves every stated tradeoff with cited evidence.",
+  "escalate_when": ["A required primary source is inaccessible."],
+  "authority": {
+    "allowed": ["Read approved sources and produce a decision memo."],
+    "prohibited": ["Purchase, publish, or send anything."],
+    "proof_required": ["Cite every material current claim."],
+    "stop_conditions": ["Stop if the decision depends on missing owner intent."]
+  }
+}

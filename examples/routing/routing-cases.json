@@ -1,0 +1,7 @@
+[
+  {"name": "mechanical extraction", "model": "gpt-5.6-luna", "thinking": "low"},
+  {"name": "frozen plan implementation", "model": "gpt-5.6-terra", "thinking": "medium"},
+  {"name": "ambiguous architecture", "model": "gpt-5.6-sol", "thinking": "high"},
+  {"name": "indivisible hardest problem", "model": "gpt-5.6-sol", "thinking": "max"},
+  {"name": "independent high value lanes", "model": "gpt-5.6-sol", "thinking": "ultra"}
+]

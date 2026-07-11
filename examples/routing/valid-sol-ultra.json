@@ -1,0 +1,14 @@
+{
+  "task_class": "proof_review",
+  "model": "gpt-5.6-sol",
+  "thinking": "ultra",
+  "rationale": "The high-value review has multiple independent evidence lanes.",
+  "quality_gate": "Each independent lane returns evidence and the conductor reconciles conflicts.",
+  "escalate_when": ["Two lanes require writes to the same files."],
+  "authority": {
+    "allowed": ["Delegate independent read-only evidence checks."],
+    "prohibited": ["Delegate merges, deploys, public sends, or destructive actions."],
+    "proof_required": ["Identify each lane, source, result, and unresolved conflict."],
+    "stop_conditions": ["Stop if the work cannot be split without shared mutable state."]
+  }
+}

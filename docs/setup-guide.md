@@ -16,7 +16,8 @@ From this kit:
 ./install.sh /path/to/your/project
 ```
 
-The installer copies prompts, templates, docs, and examples into `.caps/`.
+The installer copies prompts, templates, docs, routing schemas, and examples
+into `.caps/`.
 
 It also writes `.caps/bootstrap/start-caps-conductor.md`, the prompt that starts
 the first `CAPS CONDUCTOR` lane inside Codex.
@@ -99,6 +100,7 @@ test -f AGENTS.md
 test -f .caps/bootstrap/start-caps-conductor.md
 test -f .caps/prompts/conductor.md
 test -f .caps/prompts/workers/implementation.md
+test -f .caps/schemas/routing-decision.schema.json
 ```
 
 ## Upgrade Later

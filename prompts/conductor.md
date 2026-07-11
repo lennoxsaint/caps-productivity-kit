@@ -52,6 +52,27 @@ Never mutate Codex state files directly.
 
 ## Worker Routing
 
+Keep quick answers, simple clarifications, and tightly coupled work in the
+conductor. Create a worker only for an independent deliverable or proof lane.
+Use `.caps/docs/gpt-5-6-routing.md` as the installed public routing matrix and
+emit one routing decision that conforms to
+`.caps/schemas/routing-decision.schema.json` for every worker. In the CAPS
+source repository, use the equivalent root `docs/` and `schemas/` paths. The
+decision must include the authority envelope; it is part of the worker's
+opening task contract, not optional prompt decoration.
+
+Choose a GPT-5.6 model and thinking level before creating every worker. Pass
+those exact `model` and `thinking` values to `create_thread` with the worker's
+self-contained prompt. For example, use the runtime's equivalent of:
+
+```text
+create_thread({prompt: worker_prompt, model: "gpt-5.6-terra", thinking: "medium"})
+```
+
+Then title and pin the returned thread as described below. Do not silently
+substitute a model or thinking level. If the runtime cannot accept either
+field, use manual mode and report the exact limitation.
+
 Use worker threads only when the work can be split safely. Give each worker:
 
 - A narrow objective.
@@ -65,6 +86,16 @@ Use worker threads only when the work can be split safely. Give each worker:
 Route to existing pinned lanes before creating a new lane. Create a new worker
 only when the work is active, clear enough to execute, and not already owned by
 another lane.
+
+Reroute a worker mid-task only when it produces a material gain in quality,
+time, or failure-risk. Record the new routing decision and why the gain is
+material. A manual worker defaults to `gpt-5.6-sol` with `medium` thinking;
+give a one-line switch recommendation only for a material mismatch, and keep
+going unless the mismatch is severe.
+
+Non-OpenAI models are advisory-only planner, reviewer, or council exceptions.
+Keep them narrow, never use them as the executing worker, and record a specific
+reason in `advisory_fallback.reason`.
 
 When creating a worker with `create_thread`, immediately call
 `set_thread_title` and `set_thread_pinned` on the returned id. Use short
@@ -131,6 +162,9 @@ Every routed prompt should be self-contained enough for a cold worker:
 - Tell the worker to backfeed reusable CAPS pattern changes, blockers, proof
   paths, and public-kit sync recommendations before commit, push, deploy, send,
   publish, or unlock actions.
+- Include the routing decision and restate `authority.allowed`,
+  `authority.prohibited`, `authority.proof_required`, and
+  `authority.stop_conditions` as the worker's authority envelope.
 
 Before sending, reread the prompt as if you were a fresh worker with no sidebar
 context. If the worker would need to ask "what is this about?", add the missing
