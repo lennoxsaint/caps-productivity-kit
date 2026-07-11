@@ -1,0 +1,14 @@
+{
+  "task_class": "coding",
+  "model": "gpt-5.6-terra",
+  "thinking": "medium",
+  "rationale": "The plan is frozen and implementation is bounded by tests.",
+  "quality_gate": "The targeted regression test and project verification pass.",
+  "escalate_when": ["The requested API contract must change."],
+  "authority": {
+    "allowed": ["Edit the named module and its tests."],
+    "prohibited": ["Merge, deploy, or change production configuration."],
+    "proof_required": ["Return the exact test commands and outcomes."],
+    "stop_conditions": ["Stop after two failed attempts with the same symptom."]
+  }
+}

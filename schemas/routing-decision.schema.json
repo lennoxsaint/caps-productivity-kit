@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/caps/schemas/routing-decision.schema.json",
+  "title": "CAPS routing decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_class", "model", "thinking", "rationale", "quality_gate", "escalate_when", "authority"],
+  "properties": {
+    "task_class": {"type": "string", "enum": ["coding", "research_strategy", "computer_use", "content_polish", "transformation", "proof_review"]},
+    "model": {"type": "string", "enum": ["gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol"]},
+    "thinking": {"type": "string", "enum": ["low", "medium", "high", "xhigh", "max", "ultra"]},
+    "rationale": {"type": "string", "minLength": 1},
+    "quality_gate": {"type": "string", "minLength": 1},
+    "escalate_when": {"$ref": "#/$defs/nonemptyStringArray"},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed", "prohibited", "proof_required", "stop_conditions"],
+      "properties": {
+        "allowed": {"$ref": "#/$defs/nonemptyStringArray"},
+        "prohibited": {"$ref": "#/$defs/nonemptyStringArray"},
+        "proof_required": {"$ref": "#/$defs/nonemptyStringArray"},
+        "stop_conditions": {"$ref": "#/$defs/nonemptyStringArray"}
+      }
+    },
+    "advisory_fallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "role", "reason"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "enum": ["planner", "reviewer", "council"]},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "$defs": {
+    "nonemptyStringArray": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  }
+}

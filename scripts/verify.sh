@@ -6,6 +6,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 required_files=(
   "README.md"
   "AGENTS.md"
+  "CONTEXT.md"
   "install.sh"
   "templates/AGENTS.caps-lane-factory.md"
   "templates/AGENTS.global.md"
@@ -22,6 +23,8 @@ required_files=(
   "docs/setup-guide.md"
   "docs/naming-and-pinning.md"
   "docs/conductor-workflow.md"
+  "docs/gpt-5-6-routing.md"
+  "docs/adr/0001-public-routing-engine-private-profile.md"
   "docs/operator-loop.md"
   "docs/evidence-and-handoffs.md"
   "docs/adjacent-repos.md"
@@ -45,6 +48,14 @@ required_files=(
   "packs/full-circle-5/lanes/daily-content-review.md"
   "examples/feature-build/README.md"
   "examples/release-check/README.md"
+  "examples/routing/valid-luna.json"
+  "examples/routing/valid-terra.json"
+  "examples/routing/valid-sol-max.json"
+  "examples/routing/valid-sol-ultra.json"
+  "examples/routing/invalid-missing-authority.json"
+  "examples/routing/routing-cases.json"
+  "schemas/routing-decision.schema.json"
+  "scripts/verify-routing.py"
 )
 
 missing=0
@@ -66,6 +77,7 @@ fi
 
 bash -n "$root/install.sh"
 bash -n "$root/scripts/verify.sh"
+python3 "$root/scripts/verify-routing.py"
 
 for pack_dir in "$root"/packs/*; do
   [[ -d "$pack_dir" ]] || continue

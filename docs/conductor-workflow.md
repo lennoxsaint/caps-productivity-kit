@@ -41,6 +41,13 @@ Use workers for independent lanes:
 
 Do not create workers for tiny tasks. Coordination has a cost.
 
+For every real worker lane, choose the GPT-5.6 route and authority envelope
+before creating it. See `docs/gpt-5-6-routing.md`; the decision must conform to
+`schemas/routing-decision.schema.json`. Pass its exact `model` and `thinking`
+values to `create_thread`, then title and pin the worker. The authority envelope
+is an action-time guardrail: it names what the worker may do, may not do, must
+prove, and must stop for.
+
 For complex, proof-sensitive, or multi-surface work, first decide whether the
 task needs a dynamic harness. A harness is a temporary task organization with
 explicit evidence sources, split roles, verifier rubrics, stop conditions, and
