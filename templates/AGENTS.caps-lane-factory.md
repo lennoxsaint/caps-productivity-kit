@@ -14,6 +14,9 @@ This workspace uses CAPS, the Codex Agent Productivity System.
 - Before every worker, create a routing decision using
   `.caps/docs/gpt-5-6-routing.md` and `.caps/schemas/routing-decision.schema.json`.
   Include its authority envelope in the worker prompt.
+- Optimize verified successful work per minute, including retries and rework.
+  Luna is the safe-retry starting route; Terra requires repeated personal-eval
+  or runtime evidence; Sol owns ambiguity and costly failure.
 - When thread-control tools are available, pass the routing decision's exact
   GPT-5.6 `model` and `thinking` values to `create_thread`, then immediately
   call `set_thread_title` and `set_thread_pinned`. If model or thinking cannot
@@ -21,6 +24,9 @@ This workspace uses CAPS, the Codex Agent Productivity System.
 - Reroute only for a material quality, time, or failure-risk gain. Manual work
   defaults to `gpt-5.6-sol` / `medium`; suggest a switch only for a material
   mismatch, and stop only when severe.
+- Ultra is root-only. Never assign Ultra to an already delegated worker or
+  create nested Ultra delegation. Do not confuse inherited subagents with
+  `create_thread` workers that accept explicit model and thinking values.
 - Non-OpenAI planner, reviewer, or council use is advisory-only and requires a
   written reason; it cannot replace the executing GPT-5.6 worker.
 - Use short uppercase action-first titles, capped at 48 characters without

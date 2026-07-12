@@ -4,14 +4,42 @@
   "title": "CAPS routing decision",
   "type": "object",
   "additionalProperties": false,
-  "required": ["task_class", "model", "thinking", "rationale", "quality_gate", "escalate_when", "authority"],
+  "required": ["task_class", "model", "thinking", "routing_mode", "evidence_state", "execution_level", "rationale", "quality_gate", "escalate_when", "authority"],
   "properties": {
     "task_class": {"type": "string", "enum": ["coding", "research_strategy", "computer_use", "content_polish", "transformation", "proof_review"]},
     "model": {"type": "string", "enum": ["gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol"]},
     "thinking": {"type": "string", "enum": ["low", "medium", "high", "xhigh", "max", "ultra"]},
+    "routing_mode": {"type": "string", "enum": ["direct", "probe_then_escalate"]},
+    "evidence_state": {"type": "string", "enum": ["official_guidance", "external_benchmark", "personal_eval", "runtime_observation"]},
+    "execution_level": {"type": "string", "enum": ["root", "worker"]},
     "rationale": {"type": "string", "minLength": 1},
     "quality_gate": {"type": "string", "minLength": 1},
     "escalate_when": {"$ref": "#/$defs/nonemptyStringArray"},
+    "escalation_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "thinking"],
+      "properties": {
+        "model": {"type": "string", "enum": ["gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol"]},
+        "thinking": {"type": "string", "enum": ["low", "medium", "high", "xhigh", "max"]}
+      }
+    },
+    "calibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt", "compared_models", "runs_per_candidate", "metric"],
+      "properties": {
+        "receipt": {"type": "string", "minLength": 1},
+        "compared_models": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "string", "enum": ["gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol"]}
+        },
+        "runs_per_candidate": {"type": "integer", "minimum": 3},
+        "metric": {"const": "verified_completions_per_minute"}
+      }
+    },
     "authority": {
       "type": "object",
       "additionalProperties": false,
@@ -34,6 +62,25 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {"properties": {"routing_mode": {"const": "probe_then_escalate"}}},
+      "then": {"required": ["escalation_route"]}
+    },
+    {
+      "if": {"properties": {"thinking": {"const": "ultra"}}},
+      "then": {"properties": {"execution_level": {"const": "root"}}}
+    },
+    {
+      "if": {"properties": {"model": {"const": "gpt-5.6-terra"}}},
+      "then": {
+        "required": ["calibration"],
+        "properties": {
+          "evidence_state": {"enum": ["personal_eval", "runtime_observation"]}
+        }
+      }
+    }
+  ],
   "$defs": {
     "nonemptyStringArray": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
   }

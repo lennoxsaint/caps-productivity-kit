@@ -1,10 +1,19 @@
 {
   "task_class": "coding",
   "model": "gpt-5.6-terra",
-  "thinking": "medium",
-  "rationale": "The plan is frozen and implementation is bounded by tests.",
+  "thinking": "high",
+  "routing_mode": "direct",
+  "evidence_state": "personal_eval",
+  "execution_level": "worker",
+  "rationale": "Repeated personal evals show Terra completes this bounded tool workflow faster than passing Luna and Sol routes.",
   "quality_gate": "The targeted regression test and project verification pass.",
   "escalate_when": ["The requested API contract must change."],
+  "calibration": {
+    "receipt": "routing-receipts/bounded-tool-work.json",
+    "compared_models": ["gpt-5.6-luna", "gpt-5.6-sol"],
+    "runs_per_candidate": 3,
+    "metric": "verified_completions_per_minute"
+  },
   "authority": {
     "allowed": ["Edit the named module and its tests."],
     "prohibited": ["Merge, deploy, or change production configuration."],

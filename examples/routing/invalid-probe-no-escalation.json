@@ -1,0 +1,17 @@
+{
+  "task_class": "transformation",
+  "model": "gpt-5.6-luna",
+  "thinking": "low",
+  "routing_mode": "probe_then_escalate",
+  "evidence_state": "official_guidance",
+  "execution_level": "worker",
+  "rationale": "A probe must declare its fallback route.",
+  "quality_gate": "Output matches the schema.",
+  "escalate_when": ["The deterministic validator fails."],
+  "authority": {
+    "allowed": ["Transform supplied input."],
+    "prohibited": ["Edit the source."],
+    "proof_required": ["Return record counts."],
+    "stop_conditions": ["Stop if input is ambiguous."]
+  }
+}

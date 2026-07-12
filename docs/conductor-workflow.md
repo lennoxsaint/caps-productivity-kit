@@ -48,6 +48,12 @@ values to `create_thread`, then title and pin the worker. The authority envelope
 is an action-time guardrail: it names what the worker may do, may not do, must
 prove, and must stop for.
 
+Optimize verified successful work per minute through that proof gate. Count
+failed probes, retries, and rework. Use Luna for safe deterministic probes,
+Terra only with repeated personal/runtime evidence, and Sol when ambiguity or
+failure cost makes probing wasteful. Ultra is a root-only topology and must not
+be assigned to an already delegated worker.
+
 For complex, proof-sensitive, or multi-surface work, first decide whether the
 task needs a dynamic harness. A harness is a temporary task organization with
 explicit evidence sources, split roles, verifier rubrics, stop conditions, and
