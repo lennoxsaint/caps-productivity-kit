@@ -1,0 +1,17 @@
+{
+  "task_class": "coding",
+  "model": "gpt-5.6-terra",
+  "thinking": "high",
+  "routing_mode": "direct",
+  "evidence_state": "external_benchmark",
+  "execution_level": "worker",
+  "rationale": "An aggregate chart alone is insufficient evidence for Terra.",
+  "quality_gate": "Targeted tests pass.",
+  "escalate_when": ["The quality gate fails."],
+  "authority": {
+    "allowed": ["Run the bounded fixture."],
+    "prohibited": ["Expand scope."],
+    "proof_required": ["Return test results."],
+    "stop_conditions": ["Stop on a severe error."]
+  }
+}

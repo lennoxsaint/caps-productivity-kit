@@ -1,0 +1,17 @@
+{
+  "task_class": "proof_review",
+  "model": "gpt-5.6-sol",
+  "thinking": "ultra",
+  "routing_mode": "direct",
+  "evidence_state": "official_guidance",
+  "execution_level": "worker",
+  "rationale": "Ultra cannot be nested inside a worker.",
+  "quality_gate": "Every lane returns proof.",
+  "escalate_when": ["Lanes share mutable state."],
+  "authority": {
+    "allowed": ["Read supplied evidence."],
+    "prohibited": ["Spawn nested Ultra work."],
+    "proof_required": ["Return source references."],
+    "stop_conditions": ["Stop if work cannot split safely."]
+  }
+}

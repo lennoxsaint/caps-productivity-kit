@@ -2,9 +2,13 @@
   "task_class": "transformation",
   "model": "gpt-5.6-luna",
   "thinking": "low",
+  "routing_mode": "probe_then_escalate",
+  "evidence_state": "official_guidance",
+  "execution_level": "worker",
   "rationale": "The task is specific, repeatable, and has a deterministic output.",
   "quality_gate": "Every input record appears exactly once in valid JSON.",
   "escalate_when": ["The source contains ambiguous or conflicting fields."],
+  "escalation_route": {"model": "gpt-5.6-sol", "thinking": "medium"},
   "authority": {
     "allowed": ["Read the supplied fixture and return transformed JSON."],
     "prohibited": ["Edit source files or contact external services."],

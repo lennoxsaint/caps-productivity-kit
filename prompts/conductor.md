@@ -61,17 +61,27 @@ source repository, use the equivalent root `docs/` and `schemas/` paths. The
 decision must include the authority envelope; it is part of the worker's
 opening task contract, not optional prompt decoration.
 
-Choose a GPT-5.6 model and thinking level before creating every worker. Pass
+Choose a GPT-5.6 model and thinking level before creating every worker. Optimize
+verified successful work per minute through the acceptance gate, including
+failed probes, retries, and rework. Luna is the starting route only for precise,
+safely retryable work with deterministic verification. Terra is an evidence-
+gated exception and requires repeated `personal_eval` or `runtime_observation`
+showing it beats passing Luna and Sol routes. Use Sol when failure is costly,
+verification is weak, or integration judgment matters. Pass
 those exact `model` and `thinking` values to `create_thread` with the worker's
 self-contained prompt. For example, use the runtime's equivalent of:
 
 ```text
-create_thread({prompt: worker_prompt, model: "gpt-5.6-terra", thinking: "medium"})
+create_thread({prompt: worker_prompt, model: "gpt-5.6-luna", thinking: "high"})
 ```
 
 Then title and pin the returned thread as described below. Do not silently
 substitute a model or thinking level. If the runtime cannot accept either
 field, use manual mode and report the exact limitation.
+
+Ultra is root-only. Never assign Ultra to a worker or nest Ultra delegation.
+`create_thread` workers accept explicit routes; inherited subagents may retain
+their parent route and are not a substitute for mixed-model worker creation.
 
 Use worker threads only when the work can be split safely. Give each worker:
 

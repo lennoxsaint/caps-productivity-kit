@@ -2,6 +2,9 @@
   "task_class": "coding",
   "model": "gpt-5.6-terra",
   "thinking": "medium",
+  "routing_mode": "direct",
+  "evidence_state": "external_benchmark",
+  "execution_level": "worker",
   "rationale": "This intentionally invalid example omits authority.",
   "quality_gate": "Tests pass.",
   "escalate_when": ["Scope changes."]
