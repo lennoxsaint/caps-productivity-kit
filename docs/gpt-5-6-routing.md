@@ -63,6 +63,11 @@ thinking level, routing mode, evidence state, execution level, rationale,
 quality gate, escalation trigger, and authority envelope. A probe route also
 declares `escalation_route`. Put the envelope in the worker's opening instruction:
 
+A Terra decision also carries `calibration`: the receipt reference, Luna and
+Sol comparison set, at least three runs per candidate, and the
+`verified_completions_per_minute` metric. Without that evidence, Terra is not a
+valid operational route.
+
 - `allowed`: the bounded actions the worker may take.
 - `prohibited`: actions outside its scope or approval boundary.
 - `proof_required`: evidence required before it reports completion.
