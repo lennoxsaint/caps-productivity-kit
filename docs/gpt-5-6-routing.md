@@ -55,6 +55,28 @@ delegated worker or create nested Ultra delegation.
 Treat a synthetic fixture winner as provisional evidence, not permanent truth.
 Recalibrate after 30 real task receipts or 30 days, whichever comes first.
 
+## Closed-loop calibration
+
+CAPS records redacted start/finish receipts in
+`~/.codex/routing/receipts.jsonl` by default. A receipt contains route metadata,
+elapsed and rework time, pass/fail state, retry count, token/cost diagnostics
+when available, and short proof labels. It must not contain raw task text,
+answers, secrets, customer data, or private proof content.
+
+Run `scripts/evaluate-routing-receipts.py` to produce recommendations. A
+task-class override requires at least 30 recent receipts, at least five samples
+for each of Luna, Terra, and Sol, a 100% acceptance rate with no severe errors
+for the winning candidate, and at least a 10% verified-completions-per-minute
+lead over the next passing route. These are minimum gates, not an instruction
+to run unsafe experiments. Canary only work with deterministic verification and
+safe retry. A private profile may use stricter gates and is responsible for
+atomic install, rollback, host verification, and expiration.
+
+Natural usage is observational rather than a perfect randomized trial. Treat a
+promotion as a reversible local optimization, expire it after 30 days, and
+continue recording outcomes. Never generalize a task-class winner into a global
+manual default without broader cross-class evidence.
+
 ## Decision And Authority Envelope
 
 Every worker gets one public-safe routing decision conforming to

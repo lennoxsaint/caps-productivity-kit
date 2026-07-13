@@ -55,7 +55,10 @@ required_files=(
   "examples/routing/invalid-missing-authority.json"
   "examples/routing/routing-cases.json"
   "schemas/routing-decision.schema.json"
+  "schemas/routing-receipt.schema.json"
   "scripts/verify-routing.py"
+  "scripts/routing-receipt.py"
+  "scripts/evaluate-routing-receipts.py"
 )
 
 missing=0
@@ -78,6 +81,23 @@ fi
 bash -n "$root/install.sh"
 bash -n "$root/scripts/verify.sh"
 python3 "$root/scripts/verify-routing.py"
+python3 -m unittest discover -s "$root/tests" -v
+
+receipt_tmp="$(mktemp -d)"
+trap 'rm -rf "$receipt_tmp"' EXIT
+receipt_id="$(python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" start --task-class coding --model gpt-5.6-sol --thinking medium --route-reason policy --quality-gate-id tests --profile-version test)"
+python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" finish --receipt-id "$receipt_id" --outcome pass --proof-ref tests >/dev/null
+python3 "$root/scripts/evaluate-routing-receipts.py" --store "$receipt_tmp/receipts.jsonl" --output "$receipt_tmp/evaluation.json" >/dev/null
+python3 - "$receipt_tmp" <<'PY'
+import json
+import pathlib
+import sys
+root = pathlib.Path(sys.argv[1])
+receipt = json.loads((root / "receipts.jsonl").read_text())
+evaluation = json.loads((root / "evaluation.json").read_text())
+assert receipt["quality_passed"] is True
+assert evaluation["receipt_count"] == 1
+PY
 
 for pack_dir in "$root"/packs/*; do
   [[ -d "$pack_dir" ]] || continue

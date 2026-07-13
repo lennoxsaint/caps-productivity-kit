@@ -33,6 +33,7 @@ It is not:
 - A Codex bootstrap prompt for creating and pinning `CAPS CONDUCTOR`
 - A conductor prompt for the main coordinating thread
 - GPT-5.6 worker routing with explicit model, thinking, and authority envelopes
+- Redacted runtime routing receipts with conservative evidence evaluation
 - Lane-tree diagrams for brain-dump routing
 - Dynamic harness templates for complex, proof-sensitive work
 - Worker-thread prompts for implementation, research, QA, docs, and review lanes

@@ -86,7 +86,13 @@ copy_dir "$script_dir/templates" "$caps_dir/templates"
 copy_dir "$script_dir/docs" "$caps_dir/docs"
 copy_dir "$script_dir/schemas" "$caps_dir/schemas"
 copy_dir "$script_dir/examples" "$caps_dir/examples"
+copy_dir "$script_dir/scripts" "$caps_dir/scripts"
 mkdir -p "$caps_dir/bootstrap"
+mkdir -p "$caps_dir/state"
+cat > "$caps_dir/state/.gitignore" <<'EOF'
+*
+!.gitignore
+EOF
 cp "$script_dir/prompts/bootstrap-caps-conductor.md" "$caps_dir/bootstrap/start-caps-conductor.md"
 
 if [[ -n "$pack_name" ]]; then

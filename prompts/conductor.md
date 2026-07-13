@@ -103,6 +103,32 @@ material. A manual worker defaults to `gpt-5.6-sol` with `medium` thinking;
 give a one-line switch recommendation only for a material mismatch, and keep
 going unless the mismatch is severe.
 
+### Runtime receipt loop
+
+For every created worker, start a redacted receipt immediately before
+`create_thread`:
+
+```bash
+receipt_id="$(python3 .caps/scripts/routing-receipt.py start \
+  --task-class coding --model gpt-5.6-sol --thinking medium \
+  --route-reason policy --quality-gate-id targeted-tests \
+  --profile-version "<installed-profile-version>")"
+```
+
+After reviewing the worker against its declared quality gate, finish the same
+receipt with `--outcome pass`, `fail`, or `abandoned`. Include retry and rework
+time and only short proof labels; never include prompts, answers, secrets,
+customer data, or private paths. A task is not routing-complete until its
+receipt is finished. If receipt recording fails, report the exact error but do
+not weaken the quality gate or fabricate an outcome.
+
+Use canary routes only for deterministic, safely retryable work. Mark them with
+`--route-reason canary` and an experiment id. Never canary external sends,
+production writes, incidents, weakly verifiable research, or other work where a
+failed probe creates material harm. The local reconciler may formalize an
+override only after balanced Luna, Terra, and Sol evidence passes its promotion
+gate; the conductor never edits route policy directly from an individual run.
+
 Non-OpenAI models are advisory-only planner, reviewer, or council exceptions.
 Keep them narrow, never use them as the executing worker, and record a specific
 reason in `advisory_fallback.reason`.
