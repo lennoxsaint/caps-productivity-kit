@@ -28,7 +28,7 @@ def digest(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
 
-def release_archive(version: str = "0.3.0") -> bytes:
+def release_archive(version: str = "0.3.1") -> bytes:
     files = {
         "automations/example.toml": b"status = \"PAUSED\"\n",
         "docs/example.md": b"new docs\n",
@@ -54,7 +54,7 @@ def manifest(archive: bytes, **overrides) -> dict:
     value = {
         "schema_version": "1.0",
         "channel": "stable",
-        "version": "0.3.0",
+        "version": "0.3.1",
         "artifact_url": "https://example.invalid/release.tar.gz",
         "artifact_sha256": digest(archive),
         "install_schema_min": "1.0",
@@ -74,10 +74,20 @@ class CapsUpdateTests(unittest.TestCase):
             root = Path(temporary)
             first = root / "one.tar.gz"
             second = root / "two.tar.gz"
-            first_hash = BUILD.build_archive(ROOT, first, "0.3.0")
-            second_hash = BUILD.build_archive(ROOT, second, "0.3.0")
+            first_hash = BUILD.build_archive(ROOT, first, "0.3.1")
+            second_hash = BUILD.build_archive(ROOT, second, "0.3.1")
             self.assertEqual(first_hash, second_hash)
             self.assertEqual(first.read_bytes(), second.read_bytes())
+
+    def test_new_release_remains_installable_by_previous_updater(self):
+        value = BUILD.build_manifest(
+            version="0.3.1",
+            artifact=Path("caps-productivity-kit-0.3.1.tar.gz"),
+            digest="a" * 64,
+        )
+        self.assertEqual(value["minimum_updater_version"], "0.3.0")
+        self.assertEqual(value["rollback_version"], "0.3.0")
+        self.assertIsNone(UPDATE.compatibility_error(value, "1.0"))
 
     def make_project(self, root: Path, local_docs: bytes = b"old docs\n") -> Path:
         project = root / "project"

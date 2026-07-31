@@ -14,6 +14,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED_PARTS = {".git", "channels", "dist", "__pycache__"}
+MINIMUM_UPDATER_VERSION = "0.3.0"
+ROLLBACK_VERSION = "0.3.0"
 
 
 def release_files(root: Path) -> list[Path]:
@@ -46,15 +48,8 @@ def build_archive(root: Path, output: Path, version: str) -> str:
     return hashlib.sha256(output.read_bytes()).hexdigest()
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "dist")
-    parser.add_argument("--manifest-output", type=Path)
-    args = parser.parse_args()
-    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    artifact = args.output_dir / f"caps-productivity-kit-{version}.tar.gz"
-    digest = build_archive(ROOT, artifact, version)
-    manifest = {
+def build_manifest(version: str, artifact: Path, digest: str) -> dict[str, object]:
+    return {
         "schema_version": "1.0",
         "channel": "stable",
         "version": version,
@@ -65,14 +60,25 @@ def main() -> None:
         "artifact_sha256": digest,
         "install_schema_min": "1.0",
         "install_schema_max": "1.0",
-        "minimum_updater_version": version,
+        "minimum_updater_version": MINIMUM_UPDATER_VERSION,
         "disruptive": False,
         "release_notes_url": (
             "https://github.com/lennoxsaint/caps-productivity-kit/"
             f"releases/tag/v{version}"
         ),
-        "rollback_version": "0.2.0",
+        "rollback_version": ROLLBACK_VERSION,
     }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "dist")
+    parser.add_argument("--manifest-output", type=Path)
+    args = parser.parse_args()
+    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    artifact = args.output_dir / f"caps-productivity-kit-{version}.tar.gz"
+    digest = build_archive(ROOT, artifact, version)
+    manifest = build_manifest(version, artifact, digest)
     if args.manifest_output:
         args.manifest_output.parent.mkdir(parents=True, exist_ok=True)
         args.manifest_output.write_text(

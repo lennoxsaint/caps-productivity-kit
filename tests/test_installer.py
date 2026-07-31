@@ -38,10 +38,25 @@ class InstallerTests(unittest.TestCase):
             manifest = json.loads(
                 (project / ".caps/install-manifest.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(manifest["version"], "0.3.0")
+            self.assertEqual(manifest["version"], "0.3.1")
             self.assertIn("automations/pinned-title-sync/automation.toml", manifest["managed_files"])
+            self.assertIn("scripts/automation-doctor.py", manifest["managed_files"])
             self.assertNotIn("config/title-preferences.json", manifest["managed_files"])
             self.assertTrue((project / ".caps/defaults/title-preferences.json").exists())
+            doctor = subprocess.run(
+                [
+                    "python3",
+                    str(project / ".caps/scripts/automation-doctor.py"),
+                    "--project",
+                    str(project),
+                    "activation",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(doctor.returncode, 0, doctor.stderr)
+            self.assertIn(str(project.resolve()), doctor.stdout)
 
 
 if __name__ == "__main__":
