@@ -48,6 +48,11 @@ values to `create_thread`, then title and pin the worker. The authority envelope
 is an action-time guardrail: it names what the worker may do, may not do, must
 prove, and must stop for.
 
+Complete the decision's redacted task snapshot before routing. The conductor
+owns task understanding, decomposition, risk, acceptance criteria, and stop
+conditions; the worker receives that bounded packet instead of reconstructing
+intent from a raw brain dump or voice transcript.
+
 Optimize verified successful work per minute through that proof gate. Count
 failed probes, retries, and rework. Use Luna for safe deterministic probes,
 Terra only with repeated personal/runtime evidence, and Sol when ambiguity or

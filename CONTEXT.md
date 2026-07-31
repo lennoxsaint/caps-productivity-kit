@@ -24,3 +24,25 @@ required proof, and stop conditions.
 
 The stated condition that requires the worker to stop, report evidence, or ask
 the conductor to reroute or expand authority.
+
+## Task state snapshot
+
+A redacted conductor-owned description of the objective, scope, acceptance
+criteria, risk, side effects, evidence references, and stop conditions that is
+complete enough to route a worker without forwarding raw conversation history.
+
+## Title coordination metadata
+
+A pinned-thread label that helps the user find current work. It can describe
+the evidence-supported task state, but it never proves execution or completion.
+
+## Manual title override
+
+An owner-selected title or emoji that automatic title synchronization preserves
+until the owner changes or clears it.
+
+## Update channel
+
+A named stream of versioned CAPS release manifests. Each manifest declares the
+artifact digest, compatibility range, disruption state, release notes, and
+rollback version.

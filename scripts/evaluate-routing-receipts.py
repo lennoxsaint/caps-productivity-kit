@@ -38,6 +38,8 @@ def score(items: list[dict]) -> dict:
         "passes": passes,
         "pass_rate": round(passes / len(items), 4) if items else 0,
         "severe_errors": sum(bool(item["severe_error"]) for item in items),
+        "incomplete_snapshots": sum(not bool(item.get("task_snapshot_complete")) for item in items),
+        "weak_delegations": sum(item.get("delegation_quality") != "complete" for item in items),
         "elapsed_seconds": round(elapsed, 3),
         "verified_completions_per_minute": round(passes * 60 / max(elapsed, 0.001), 4),
     }
@@ -59,6 +61,8 @@ def evaluate(receipts: list[dict], min_total: int, min_candidate: int, margin: f
             if value["receipts"] >= min_candidate
             and value["pass_rate"] == 1.0
             and value["severe_errors"] == 0
+            and value["incomplete_snapshots"] == 0
+            and value["weak_delegations"] == 0
         ]
         eligible.sort(key=lambda value: value["verified_completions_per_minute"], reverse=True)
         total = sum(value["receipts"] for value in scored.values())

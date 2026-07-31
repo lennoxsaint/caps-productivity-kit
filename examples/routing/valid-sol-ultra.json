@@ -1,4 +1,13 @@
 {
+  "task_snapshot": {
+    "objective": "Reconcile independent evidence lanes.",
+    "scope": ["Delegate read-only checks.", "Reconcile conflicting evidence."],
+    "acceptance_criteria": ["Every lane returns inspectable proof."],
+    "risk_level": "high",
+    "side_effects": "none",
+    "evidence_refs": ["review-manifest"],
+    "stop_conditions": ["Stop if lanes require shared mutable state."]
+  },
   "task_class": "proof_review",
   "model": "gpt-5.6-sol",
   "thinking": "ultra",

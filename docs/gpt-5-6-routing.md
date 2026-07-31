@@ -14,6 +14,29 @@ local comparative evidence before selecting Terra. See the
 [OpenAI GPT-5.6 results](https://openai.com/index/gpt-5-6/), and
 [Artificial Analysis methodology](https://artificialanalysis.ai/methodology).
 
+Official API pricing verified on 2026-07-31 is $0.20 input / $1.20 output per
+million tokens for Luna, $2 / $12 for Terra, and $5 / $30 for Sol. Price changes
+expand the candidate set; they do not lower the acceptance, safety, or proof
+gate. See the official [Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna),
+[Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra), and
+[Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol) model pages.
+
+## Conductor-first task understanding
+
+Before selecting a worker route, the Brain Conductor creates the routing
+decision's `task_snapshot`. A Voice Conductor supplies the same fields rather
+than forwarding a raw transcript. The snapshot locks:
+
+- the outcome and bounded scope;
+- acceptance criteria and evidence already available;
+- failure and side-effect risk;
+- stop conditions and owner decisions.
+
+Do not delegate until the snapshot is complete. A worker receives the snapshot,
+authority envelope, quality gate, and escalation route as one self-contained
+packet. This keeps cheap workers bounded and lets the conductor retain
+ambiguity, prioritization, and cross-lane judgment.
+
 ## Worker Matrix
 
 | Work shape | Model | Thinking |
@@ -51,6 +74,9 @@ delegated worker or create nested Ultra delegation.
    makes a probe wasteful.
 5. Escalate after one observable quality failure or material scope expansion.
    Count every attempt in elapsed time and usage; do not hide failed probes.
+6. Escalate immediately when the task snapshot proves incomplete, the worker
+   weakens acceptance criteria, or an unexpected side effect appears. Do not
+   repeat the same failed route with more effort and call it a new strategy.
 
 Treat a synthetic fixture winner as provisional evidence, not permanent truth.
 Recalibrate after 30 real task receipts or 30 days, whichever comes first.
@@ -60,7 +86,8 @@ Recalibrate after 30 real task receipts or 30 days, whichever comes first.
 CAPS records redacted start/finish receipts in
 `~/.codex/routing/receipts.jsonl` by default. A receipt contains route metadata,
 elapsed and rework time, pass/fail state, retry count, token/cost diagnostics
-when available, and short proof labels. It must not contain raw task text,
+when available, snapshot completeness, delegation quality, gate result,
+escalation reason, and short proof labels. It must not contain raw task text,
 answers, secrets, customer data, or private proof content.
 
 Run `scripts/evaluate-routing-receipts.py` to produce recommendations. A

@@ -1,4 +1,13 @@
 {
+  "task_snapshot": {
+    "objective": "Complete the bounded tool workflow with passing tests.",
+    "scope": ["Edit the named module.", "Update focused tests."],
+    "acceptance_criteria": ["Targeted and project verification pass."],
+    "risk_level": "medium",
+    "side_effects": "local_reversible",
+    "evidence_refs": ["routing-receipts/bounded-tool-work.json"],
+    "stop_conditions": ["Stop if the API contract must change."]
+  },
   "task_class": "coding",
   "model": "gpt-5.6-terra",
   "thinking": "high",

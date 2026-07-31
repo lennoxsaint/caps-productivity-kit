@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "max_title_chars": 48,
+  "min_rename_interval_minutes": 20,
+  "max_auto_renames_per_day": 12,
+  "default_emoji": "",
+  "project_emojis": {
+    "example-project": "🚀"
+  },
+  "category_emojis": {
+    "build": "🛠️",
+    "docs": "📝",
+    "plan": "🧭",
+    "qa": "🧪",
+    "research": "🔎",
+    "review": "👀",
+    "ship": "🚢",
+    "triage": "🚨"
+  },
+  "opt_out_projects": []
+}

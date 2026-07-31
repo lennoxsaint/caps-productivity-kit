@@ -54,7 +54,7 @@ def cmd_start(args: argparse.Namespace) -> None:
     store = args.store.expanduser()
     receipt_id = str(uuid.uuid4())
     payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "receipt_id": receipt_id,
         "started_at": now().isoformat(),
         "task_class": args.task_class,
@@ -63,6 +63,7 @@ def cmd_start(args: argparse.Namespace) -> None:
         "routing_mode": args.routing_mode,
         "route_reason": args.route_reason,
         "quality_gate_id": args.quality_gate_id,
+        "task_snapshot_complete": args.task_snapshot_complete,
         "experiment_id": args.experiment_id,
         "profile_version": args.profile_version,
         "host": socket.gethostname(),
@@ -89,12 +90,15 @@ def cmd_finish(args: argparse.Namespace) -> None:
         "finished_at": finished.isoformat(),
         "elapsed_seconds": round(max((finished - started).total_seconds(), 0.001), 3),
         "quality_passed": args.outcome == "pass",
+        "gate_result": args.outcome,
+        "delegation_quality": args.delegation_quality,
         "outcome": args.outcome,
         "severe_error": args.severe_error,
         "retry_count": args.retry_count,
         "rework_seconds": args.rework_seconds,
         "proof_refs": args.proof_ref,
         "failure_code": args.failure_code,
+        "escalation_reason": args.escalation_reason,
         "input_tokens": args.input_tokens,
         "output_tokens": args.output_tokens,
         "estimated_cost_usd": args.estimated_cost_usd,
@@ -117,6 +121,7 @@ def parser() -> argparse.ArgumentParser:
     start.add_argument("--routing-mode", default="direct", choices=("direct", "probe_then_escalate"))
     start.add_argument("--route-reason", required=True, choices=("default", "policy", "canary", "override"))
     start.add_argument("--quality-gate-id", required=True)
+    start.add_argument("--task-snapshot-complete", action="store_true")
     start.add_argument("--experiment-id")
     start.add_argument("--profile-version", required=True)
     start.set_defaults(handler=cmd_start)
@@ -124,11 +129,13 @@ def parser() -> argparse.ArgumentParser:
     finish = sub.add_parser("finish")
     finish.add_argument("--receipt-id", required=True)
     finish.add_argument("--outcome", required=True, choices=("pass", "fail", "abandoned"))
+    finish.add_argument("--delegation-quality", required=True, choices=("complete", "partial", "failed"))
     finish.add_argument("--severe-error", action="store_true")
     finish.add_argument("--retry-count", type=int, default=0)
     finish.add_argument("--rework-seconds", type=float, default=0.0)
     finish.add_argument("--proof-ref", action="append", default=[])
     finish.add_argument("--failure-code")
+    finish.add_argument("--escalation-reason")
     finish.add_argument("--input-tokens", type=int)
     finish.add_argument("--output-tokens", type=int)
     finish.add_argument("--estimated-cost-usd", type=float)
@@ -140,6 +147,8 @@ def main() -> None:
     args = parser().parse_args()
     if getattr(args, "quality_gate_id", None) and len(args.quality_gate_id) > 80:
         raise SystemExit("quality-gate-id must be a short label, not private task content")
+    if getattr(args, "escalation_reason", None) and len(args.escalation_reason) > 120:
+        raise SystemExit("escalation-reason must be a short label, not private task content")
     if getattr(args, "retry_count", 0) < 0 or getattr(args, "rework_seconds", 0) < 0:
         raise SystemExit("retry and rework values cannot be negative")
     args.handler(args)

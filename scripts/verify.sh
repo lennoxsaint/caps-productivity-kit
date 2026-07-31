@@ -7,6 +7,7 @@ required_files=(
   "README.md"
   "AGENTS.md"
   "CONTEXT.md"
+  "VERSION"
   "install.sh"
   "templates/AGENTS.caps-lane-factory.md"
   "templates/AGENTS.global.md"
@@ -22,6 +23,7 @@ required_files=(
   "prompts/workers/review.md"
   "docs/setup-guide.md"
   "docs/naming-and-pinning.md"
+  "docs/updates.md"
   "docs/conductor-workflow.md"
   "docs/gpt-5-6-routing.md"
   "docs/adr/0001-public-routing-engine-private-profile.md"
@@ -59,6 +61,15 @@ required_files=(
   "scripts/verify-routing.py"
   "scripts/routing-receipt.py"
   "scripts/evaluate-routing-receipts.py"
+  "scripts/title-sync-policy.py"
+  "scripts/caps-update.py"
+  "scripts/build-release.py"
+  "config/title-preferences.json"
+  "automations/pinned-title-sync/automation.toml"
+  "automations/pinned-title-sync/prompt.md"
+  "automations/caps-update/automation.toml"
+  "automations/caps-update/prompt.md"
+  "channels/stable.json"
 )
 
 missing=0
@@ -85,8 +96,8 @@ python3 -m unittest discover -s "$root/tests" -v
 
 receipt_tmp="$(mktemp -d)"
 trap 'rm -rf "$receipt_tmp"' EXIT
-receipt_id="$(python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" start --task-class coding --model gpt-5.6-sol --thinking medium --route-reason policy --quality-gate-id tests --profile-version test)"
-python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" finish --receipt-id "$receipt_id" --outcome pass --proof-ref tests >/dev/null
+receipt_id="$(python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" start --task-class coding --model gpt-5.6-sol --thinking medium --route-reason policy --quality-gate-id tests --task-snapshot-complete --profile-version test)"
+python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" finish --receipt-id "$receipt_id" --outcome pass --delegation-quality complete --proof-ref tests >/dev/null
 python3 "$root/scripts/evaluate-routing-receipts.py" --store "$receipt_tmp/receipts.jsonl" --output "$receipt_tmp/evaluation.json" >/dev/null
 python3 - "$receipt_tmp" <<'PY'
 import json
@@ -97,6 +108,25 @@ receipt = json.loads((root / "receipts.jsonl").read_text())
 evaluation = json.loads((root / "evaluation.json").read_text())
 assert receipt["quality_passed"] is True
 assert evaluation["receipt_count"] == 1
+assert receipt["schema_version"] == "1.1"
+assert receipt["task_snapshot_complete"] is True
+assert receipt["delegation_quality"] == "complete"
+PY
+
+python3 "$root/scripts/build-release.py" --output-dir "$receipt_tmp/release" >/dev/null
+python3 - "$root" "$receipt_tmp/release" <<'PY'
+import hashlib
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+release_dir = pathlib.Path(sys.argv[2])
+version = (root / "VERSION").read_text(encoding="utf-8").strip()
+channel = json.loads((root / "channels/stable.json").read_text(encoding="utf-8"))
+artifact = release_dir / f"caps-productivity-kit-{version}.tar.gz"
+assert channel["version"] == version
+assert channel["artifact_sha256"] == hashlib.sha256(artifact.read_bytes()).hexdigest()
 PY
 
 for pack_dir in "$root"/packs/*; do

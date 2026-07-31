@@ -101,14 +101,21 @@ test -f .caps/bootstrap/start-caps-conductor.md
 test -f .caps/prompts/conductor.md
 test -f .caps/prompts/workers/implementation.md
 test -f .caps/schemas/routing-decision.schema.json
+test -f .caps/scripts/caps-update.py
+test -f .caps/automations/pinned-title-sync/automation.toml
 ```
 
 ## Upgrade Later
 
-To update `.caps/`, rerun:
+Version 0.3.0 and later records managed-file hashes and supports the stable
+update channel:
 
 ```bash
-./install.sh /path/to/your/project
+python3 .caps/scripts/caps-update.py --project . check
+python3 .caps/scripts/caps-update.py --project . apply
 ```
 
-Review any local prompt edits before replacing them.
+The updater verifies the release digest and compatibility, preserves local
+configuration, state, and modified managed files, and creates a rollback
+backup. Older installations need one final rerun of the current `install.sh` to
+install the update foundation; review local prompt changes first.

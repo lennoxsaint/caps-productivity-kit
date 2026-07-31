@@ -38,6 +38,9 @@ It is not:
 - Dynamic harness templates for complex, proof-sensitive work
 - Worker-thread prompts for implementation, research, QA, docs, and review lanes
 - Naming and pinning conventions for keeping active work findable
+- Optional project/category emoji and evidence-gated pinned-title sync
+- Versioned stable updates with integrity checks, local-override preservation,
+  and rollback
 - A read-first operator loop for "what did I miss?" triage
 - A proof-state matrix for drafts, queues, sends, publishing, deploys, and live verification
 - A setup guide for new workspaces
@@ -72,12 +75,15 @@ The installer creates:
 ```text
 AGENTS.md
 .caps/
+  automations/
   bootstrap/
+  config/
   prompts/
   templates/
   docs/
   examples/
   packs/
+  state/
 ```
 
 Then, in Codex, run the installed bootstrap prompt:
@@ -90,6 +96,11 @@ The bootstrap creates one project-scoped `CAPS CONDUCTOR` thread, titles it, and
 pins it when Codex exposes `create_thread`, `set_thread_title`, and
 `set_thread_pinned`. If those tools are missing, it reports the exact skipped
 step and gives manual-mode instructions.
+
+CAPS also installs paused automation templates for Luna-powered pinned-title
+reconciliation and stable updates. They stay paused until a native Codex runtime
+registers and verifies them. See `docs/naming-and-pinning.md` and
+`docs/updates.md`.
 
 ## How CAPS Works
 
@@ -139,6 +150,8 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 ├── install.sh
 ├── scripts/
 │   ├── verify-routing.py
+│   ├── title-sync-policy.py
+│   ├── caps-update.py
 │   └── verify.sh
 ├── schemas/
 │   └── routing-decision.schema.json
@@ -160,6 +173,7 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 ├── docs/
 │   ├── setup-guide.md
 │   ├── naming-and-pinning.md
+│   ├── updates.md
 │   ├── conductor-workflow.md
 │   ├── gpt-5-6-routing.md
 │   ├── operator-loop.md
