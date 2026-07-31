@@ -268,9 +268,17 @@ Next:
      $caps_dir/automations/pinned-title-sync/automation.toml
      $caps_dir/automations/caps-update/automation.toml
 
-     Activate them through Codex only when the runtime exposes native
-     automation and thread-control tools. The title sync uses a twenty-minute
-     fallback; the stable updater checks daily and preserves local overrides.
+     Generate the project-specific native activation prompt:
+
+     python3 "$caps_dir/scripts/automation-doctor.py" \
+       --project "$target_dir" activation
+
+     Give that output to Codex. It uses absolute prompt paths and asks the
+     native Scheduled task controls to upsert, activate, and read back both
+     jobs. The title sync uses a twenty-minute fallback; the stable updater
+     checks daily and preserves local overrides. If native controls are absent,
+     CAPS reports the activation blocker and does not touch Codex registry
+     files directly.
 EOF
 
 if [[ -n "$pack_name" ]]; then

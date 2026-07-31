@@ -43,7 +43,25 @@ in `.caps/state/update-status.json`. A disruptive release requires explicit
 `--allow-disruptive`. A digest mismatch, incompatible schema, unavailable
 artifact, or interrupted apply leaves the installed release in place.
 
-The paused `caps-stable-update` Codex automation template checks daily and may
+The paused `caps-stable-update` Codex automation proposal checks daily and may
 apply only verified, compatible, non-disruptive releases. Installing CAPS copies
-the template but does not silently register or activate a global Codex
-automation. Activation requires a Codex runtime with native automation support.
+the proposal but does not silently register or activate a global Codex
+automation.
+
+Generate the project-specific native activation request:
+
+```bash
+python3 .caps/scripts/automation-doctor.py --project . activation
+```
+
+The request uses the installed project's absolute prompt path and working
+directory, asks native Scheduled controls to upsert by stable ID, and requires a
+readback. Verify the registered task with:
+
+```bash
+python3 .caps/scripts/automation-doctor.py --project . inspect
+```
+
+Activation requires a Codex runtime with native Scheduled task support. The
+doctor is read-only with respect to Codex's registry; missing controls remain an
+explicit `native_automation_controls_unavailable` blocker.

@@ -97,10 +97,18 @@ pins it when Codex exposes `create_thread`, `set_thread_title`, and
 `set_thread_pinned`. If those tools are missing, it reports the exact skipped
 step and gives manual-mode instructions.
 
-CAPS also installs paused automation templates for Luna-powered pinned-title
-reconciliation and stable updates. They stay paused until a native Codex runtime
-registers and verifies them. See `docs/naming-and-pinning.md` and
-`docs/updates.md`.
+CAPS also installs paused automation proposals for Luna-powered pinned-title
+reconciliation and stable updates. Generate a project-specific activation
+prompt with:
+
+```bash
+python3 .caps/scripts/automation-doctor.py --project . activation
+```
+
+Give that output to Codex so its native Scheduled controls can upsert and read
+back the jobs. The doctor distinguishes a copied proposal from a genuinely
+active task and never writes Codex registry files. See
+`docs/naming-and-pinning.md` and `docs/updates.md`.
 
 ## How CAPS Works
 
@@ -151,6 +159,7 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 ├── scripts/
 │   ├── verify-routing.py
 │   ├── title-sync-policy.py
+│   ├── automation-doctor.py
 │   ├── caps-update.py
 │   └── verify.sh
 ├── schemas/

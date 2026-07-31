@@ -102,8 +102,33 @@ test -f .caps/prompts/conductor.md
 test -f .caps/prompts/workers/implementation.md
 test -f .caps/schemas/routing-decision.schema.json
 test -f .caps/scripts/caps-update.py
+test -f .caps/scripts/automation-doctor.py
 test -f .caps/automations/pinned-title-sync/automation.toml
 ```
+
+## Activate Scheduled Tasks
+
+The installer copies proposals; it does not claim they are registered. Generate
+the exact project-specific activation request:
+
+```bash
+python3 .caps/scripts/automation-doctor.py --project . activation
+```
+
+Give the output to Codex in a runtime with native Scheduled task controls. It
+will request an idempotent upsert for both tasks, use absolute prompt paths,
+bind the current project working directory, and require a native readback.
+CAPS never substitutes direct edits to Codex registry files.
+
+After activation, verify the real registry state:
+
+```bash
+python3 .caps/scripts/automation-doctor.py --project . inspect
+```
+
+The command exits non-zero with `registration_required`, `template_invalid`, or
+`drift` until both tasks are natively active and match their project, schedule,
+model, reasoning effort, and prompt path.
 
 ## Upgrade Later
 

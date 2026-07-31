@@ -5,6 +5,11 @@ currently working on. Titles are coordination metadata, never execution proof.
 
 ## Capability gate
 
+Resolve `project_root` from the native automation's registered project working
+directory. Require `.caps/config/title-preferences.json` and
+`.caps/scripts/title-sync-policy.py` below that root. If either is missing,
+make no changes and report `caps_project_root_unavailable`.
+
 Require native read and mutation controls for Codex threads, including listing
 or reading pinned threads and `set_thread_title`. If those controls are absent,
 make no changes and report `native_thread_controls_unavailable`. Never mutate
@@ -12,8 +17,9 @@ Codex databases, session indexes, or global state files.
 
 ## Every run
 
-1. Read `.caps/config/title-preferences.json` and
-   `.caps/state/title-sync.json`. Respect global, project, and thread opt-outs.
+1. Read `$project_root/.caps/config/title-preferences.json` and
+   `$project_root/.caps/state/title-sync.json`. Respect global, project, and
+   thread opt-outs.
    If a native title event or explicit owner instruction shows a manual title
    or emoji choice, record `manual_override` before evaluating automatic
    changes. Clear it only after an explicit owner request.
@@ -29,9 +35,10 @@ Codex databases, session indexes, or global state files.
 4. Pipe the snapshot JSON over stdin to:
 
    ```bash
-   python3 .caps/scripts/title-sync-policy.py evaluate \
-     --config .caps/config/title-preferences.json \
-     --state .caps/state/title-sync.json
+   project_root="$(pwd -P)"
+   python3 "$project_root/.caps/scripts/title-sync-policy.py" evaluate \
+     --config "$project_root/.caps/config/title-preferences.json" \
+     --state "$project_root/.caps/state/title-sync.json"
    ```
 
 5. Apply only decisions whose action is `rename`, using native
@@ -42,9 +49,9 @@ Codex databases, session indexes, or global state files.
    redacted result to:
 
    ```bash
-   python3 .caps/scripts/title-sync-policy.py record \
-     --state .caps/state/title-sync.json \
-     --audit .caps/state/title-sync-audit.jsonl
+   python3 "$project_root/.caps/scripts/title-sync-policy.py" record \
+     --state "$project_root/.caps/state/title-sync.json" \
+     --audit "$project_root/.caps/state/title-sync-audit.jsonl"
    ```
 
 ## Guardrails

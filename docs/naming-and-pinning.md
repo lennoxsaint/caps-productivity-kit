@@ -103,9 +103,22 @@ The policy engine:
 - rate-limits automatic changes and appends a redacted audit result;
 - leaves the current title unchanged when native thread controls fail.
 
-Activate the template only through a Codex runtime that exposes native thread
-read and title controls. Never use local Codex database or global-state writes
-as a substitute.
+Generate the project-specific activation request with:
+
+```bash
+python3 .caps/scripts/automation-doctor.py --project . activation
+```
+
+Activate only through a Codex runtime that exposes native Scheduled controls
+and native thread read/title controls. The generated request binds an absolute
+prompt path and project working directory, upserts by ID, and requires native
+readback. Verify with:
+
+```bash
+python3 .caps/scripts/automation-doctor.py --project . inspect
+```
+
+Never use local Codex database or global-state writes as a substitute.
 
 ## Why It Matters
 

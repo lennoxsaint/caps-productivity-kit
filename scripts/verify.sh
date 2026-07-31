@@ -62,6 +62,7 @@ required_files=(
   "scripts/routing-receipt.py"
   "scripts/evaluate-routing-receipts.py"
   "scripts/title-sync-policy.py"
+  "scripts/automation-doctor.py"
   "scripts/caps-update.py"
   "scripts/build-release.py"
   "config/title-preferences.json"
