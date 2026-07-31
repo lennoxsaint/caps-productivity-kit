@@ -13,7 +13,8 @@ This workspace uses CAPS, the Codex Agent Productivity System.
   only for independent deliverables or proof lanes.
 - Before every worker, create a routing decision using
   `.caps/docs/gpt-5-6-routing.md` and `.caps/schemas/routing-decision.schema.json`.
-  Include its authority envelope in the worker prompt.
+  Complete its redacted task snapshot before routing, then include the snapshot
+  and authority envelope in the worker prompt.
 - Optimize verified successful work per minute, including retries and rework.
   Luna is the safe-retry starting route; Terra requires repeated personal-eval
   or runtime evidence; Sol owns ambiguity and costly failure.
@@ -31,6 +32,9 @@ This workspace uses CAPS, the Codex Agent Productivity System.
   written reason; it cannot replace the executing GPT-5.6 worker.
 - Use short uppercase action-first titles, capped at 48 characters without
   cutting mid-word.
+- Treat titles and emoji as coordination metadata, not completion proof.
+  Preserve owner overrides; automatic title sync requires a material,
+  evidence-supported task-state change and native thread controls.
 - When a brain dump is split across lanes, show a compact lane tree using
   Mermaid by default; use SCDiagram or native image jam only when useful, and
   keep sensitive details generic.

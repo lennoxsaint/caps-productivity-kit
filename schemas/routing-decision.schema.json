@@ -4,8 +4,22 @@
   "title": "CAPS routing decision",
   "type": "object",
   "additionalProperties": false,
-  "required": ["task_class", "model", "thinking", "routing_mode", "evidence_state", "execution_level", "rationale", "quality_gate", "escalate_when", "authority"],
+  "required": ["task_snapshot", "task_class", "model", "thinking", "routing_mode", "evidence_state", "execution_level", "rationale", "quality_gate", "escalate_when", "authority"],
   "properties": {
+    "task_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["objective", "scope", "acceptance_criteria", "risk_level", "side_effects", "evidence_refs", "stop_conditions"],
+      "properties": {
+        "objective": {"type": "string", "minLength": 1},
+        "scope": {"$ref": "#/$defs/nonemptyStringArray"},
+        "acceptance_criteria": {"$ref": "#/$defs/nonemptyStringArray"},
+        "risk_level": {"type": "string", "enum": ["low", "medium", "high"]},
+        "side_effects": {"type": "string", "enum": ["none", "local_reversible", "external_reversible", "irreversible"]},
+        "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "stop_conditions": {"$ref": "#/$defs/nonemptyStringArray"}
+      }
+    },
     "task_class": {"type": "string", "enum": ["coding", "research_strategy", "computer_use", "content_polish", "transformation", "proof_review"]},
     "model": {"type": "string", "enum": ["gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol"]},
     "thinking": {"type": "string", "enum": ["low", "medium", "high", "xhigh", "max", "ultra"]},

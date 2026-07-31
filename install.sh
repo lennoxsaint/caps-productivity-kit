@@ -87,6 +87,16 @@ copy_dir "$script_dir/docs" "$caps_dir/docs"
 copy_dir "$script_dir/schemas" "$caps_dir/schemas"
 copy_dir "$script_dir/examples" "$caps_dir/examples"
 copy_dir "$script_dir/scripts" "$caps_dir/scripts"
+copy_dir "$script_dir/automations" "$caps_dir/automations"
+mkdir -p "$caps_dir/defaults" "$caps_dir/config"
+cp "$script_dir/config/title-preferences.json" "$caps_dir/defaults/title-preferences.json"
+if [[ ! -f "$caps_dir/config/title-preferences.json" ]]; then
+  cp "$script_dir/config/title-preferences.json" "$caps_dir/config/title-preferences.json"
+  echo "Created title preferences: $caps_dir/config/title-preferences.json"
+else
+  echo "Preserved title preferences: $caps_dir/config/title-preferences.json"
+fi
+cp "$script_dir/VERSION" "$caps_dir/VERSION"
 mkdir -p "$caps_dir/bootstrap"
 mkdir -p "$caps_dir/state"
 cat > "$caps_dir/state/.gitignore" <<'EOF'
@@ -94,6 +104,54 @@ cat > "$caps_dir/state/.gitignore" <<'EOF'
 !.gitignore
 EOF
 cp "$script_dir/prompts/bootstrap-caps-conductor.md" "$caps_dir/bootstrap/start-caps-conductor.md"
+
+python3 - "$caps_dir" "$script_dir" <<'PY'
+import hashlib
+import json
+import pathlib
+import sys
+from datetime import datetime, timezone
+
+caps = pathlib.Path(sys.argv[1])
+source_root = pathlib.Path(sys.argv[2])
+source_mappings = {
+    "automations": "automations",
+    "docs": "docs",
+    "examples": "examples",
+    "prompts": "prompts",
+    "schemas": "schemas",
+    "scripts": "scripts",
+    "templates": "templates",
+    "VERSION": "VERSION",
+    "config/title-preferences.json": "defaults/title-preferences.json",
+    "prompts/bootstrap-caps-conductor.md": "bootstrap/start-caps-conductor.md",
+}
+managed = {}
+for source_name, target_name in source_mappings.items():
+    source = source_root / source_name
+    if source.is_file():
+        target = caps / target_name
+        managed[target_name] = hashlib.sha256(target.read_bytes()).hexdigest()
+        continue
+    for source_path in sorted(source.rglob("*")):
+        if source_path.is_file() and "__pycache__" not in source_path.parts and source_path.suffix != ".pyc":
+            relative = pathlib.Path(target_name) / source_path.relative_to(source)
+            target = caps / relative
+            managed[str(relative)] = hashlib.sha256(target.read_bytes()).hexdigest()
+manifest = {
+    "schema_version": "1.0",
+    "version": (caps / "VERSION").read_text(encoding="utf-8").strip(),
+    "channel": "stable",
+    "source_repository": "https://github.com/lennoxsaint/caps-productivity-kit",
+    "managed_files": managed,
+    "local_overrides": [],
+    "installed_at": datetime.now(timezone.utc).isoformat(),
+}
+(caps / "install-manifest.json").write_text(
+    json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+    encoding="utf-8",
+)
+PY
 
 if [[ -n "$pack_name" ]]; then
   if [[ ! -d "$script_dir/packs/$pack_name" ]]; then
@@ -205,11 +263,19 @@ Next:
      The bootstrap creates and pins CAPS CONDUCTOR when the active Codex runtime
      exposes safe thread-control tools. If those tools are unavailable, it gives
      exact manual-mode steps instead of pretending automation worked.
+  3. Review the paused automation templates:
+
+     $caps_dir/automations/pinned-title-sync/automation.toml
+     $caps_dir/automations/caps-update/automation.toml
+
+     Activate them through Codex only when the runtime exposes native
+     automation and thread-control tools. The title sync uses a twenty-minute
+     fallback; the stable updater checks daily and preserves local overrides.
 EOF
 
 if [[ -n "$pack_name" ]]; then
   cat <<EOF
-  3. Review the installed pack:
+  4. Review the installed pack:
 
      .caps/packs/$pack_name/setup.md
 

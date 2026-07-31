@@ -1,4 +1,13 @@
 {
+  "task_snapshot": {
+    "objective": "Resolve the indivisible high-value decision.",
+    "scope": ["Read approved evidence.", "Produce one decision memo."],
+    "acceptance_criteria": ["Every stated tradeoff is resolved with cited evidence."],
+    "risk_level": "high",
+    "side_effects": "none",
+    "evidence_refs": ["approved-primary-sources"],
+    "stop_conditions": ["Stop if required owner intent is missing."]
+  },
   "task_class": "research_strategy",
   "model": "gpt-5.6-sol",
   "thinking": "max",

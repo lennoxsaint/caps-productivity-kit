@@ -1,4 +1,13 @@
 {
+  "task_snapshot": {
+    "objective": "Exercise unsupported Terra evidence.",
+    "scope": ["Validate one fixture."],
+    "acceptance_criteria": ["The fixture is rejected."],
+    "risk_level": "low",
+    "side_effects": "none",
+    "evidence_refs": ["external-benchmark"],
+    "stop_conditions": ["Stop after validation."]
+  },
   "task_class": "coding",
   "model": "gpt-5.6-terra",
   "thinking": "high",

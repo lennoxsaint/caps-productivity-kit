@@ -15,6 +15,14 @@ available in the current runtime:
 - `create_thread`
 - `set_thread_title`
 - `set_thread_pinned`
+
+Also check for native Codex automation controls. If they are available, offer
+to install the paused templates from:
+- `.caps/automations/pinned-title-sync/automation.toml`
+- `.caps/automations/caps-update/automation.toml`
+
+Do not claim either automation is active until its saved schedule, model,
+reasoning effort, target, and status are read back successfully.
 - `send_message_to_thread`
 
 Do not use local Codex state files or background automation as a workaround.

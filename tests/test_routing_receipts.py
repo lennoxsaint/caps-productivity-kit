@@ -21,6 +21,8 @@ def receipt(model: str, thinking: str, elapsed: float, passed: bool = True) -> d
         "rework_seconds": 0,
         "quality_passed": passed,
         "severe_error": False,
+        "task_snapshot_complete": True,
+        "delegation_quality": "complete",
     }
 
 
@@ -45,6 +47,30 @@ class RoutingReceiptTests(unittest.TestCase):
                 receipt("gpt-5.6-terra", "high", 10, passed=index != 0),
                 receipt("gpt-5.6-sol", "medium", 15),
             ])
+        result = MODULE.evaluate(values, 30, 5, 0.10)["task_classes"]["coding"]["recommendation"]
+        self.assertNotEqual(result["model"], "gpt-5.6-terra")
+
+    def test_incomplete_conductor_snapshot_disqualifies_candidate(self):
+        values = []
+        for index in range(10):
+            luna = receipt("gpt-5.6-luna", "high", 20)
+            terra = receipt("gpt-5.6-terra", "high", 10)
+            sol = receipt("gpt-5.6-sol", "medium", 15)
+            if index == 0:
+                terra["task_snapshot_complete"] = False
+            values.extend([luna, terra, sol])
+        result = MODULE.evaluate(values, 30, 5, 0.10)["task_classes"]["coding"]["recommendation"]
+        self.assertNotEqual(result["model"], "gpt-5.6-terra")
+
+    def test_partial_delegation_disqualifies_candidate(self):
+        values = []
+        for index in range(10):
+            luna = receipt("gpt-5.6-luna", "high", 20)
+            terra = receipt("gpt-5.6-terra", "high", 10)
+            sol = receipt("gpt-5.6-sol", "medium", 15)
+            if index == 0:
+                terra["delegation_quality"] = "partial"
+            values.extend([luna, terra, sol])
         result = MODULE.evaluate(values, 30, 5, 0.10)["task_classes"]["coding"]["recommendation"]
         self.assertNotEqual(result["model"], "gpt-5.6-terra")
 

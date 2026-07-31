@@ -2,6 +2,9 @@
 
 CAPS thread names should make the active work obvious at a glance.
 
+Titles are coordination metadata. They are not proof that work ran, passed,
+merged, deployed, shipped, or became live.
+
 ## Format
 
 Use uppercase, action-first names:
@@ -68,6 +71,41 @@ When thread-control tools are available, the conductor should title and pin a
 new worker immediately after `create_thread` returns an id. If title or pin
 mutation is unavailable, report the exact skipped step and give manual
 instructions.
+
+## Project and category emoji
+
+The optional title-sync policy uses this precedence:
+
+1. explicit thread emoji override;
+2. project emoji preference;
+3. task-category emoji preference;
+4. no emoji.
+
+Edit `.caps/config/title-preferences.json` after installation. An explicit
+owner title or emoji persists until changed or cleared. Automatic reconciliation
+does not rewrite existing pinned titles merely to add an emoji; it waits for a
+material, evidence-supported task-state change.
+
+## Evidence-gated title sync
+
+The paused `caps-pinned-title-sync` automation template runs on Luna low with a
+twenty-minute fallback. Native pin, title, or task-state events should trigger
+the same policy sooner when the runtime supports them. Events complement the
+sweep; they do not replace it.
+
+The policy engine:
+
+- inspects active pinned threads only;
+- requires a new task-state revision and evidence references;
+- preserves owner wording and manual overrides;
+- rejects unverified completion language;
+- makes event and sweep decisions idempotent;
+- rate-limits automatic changes and appends a redacted audit result;
+- leaves the current title unchanged when native thread controls fail.
+
+Activate the template only through a Codex runtime that exposes native thread
+read and title controls. Never use local Codex database or global-state writes
+as a substitute.
 
 ## Why It Matters
 

@@ -1,4 +1,13 @@
 {
+  "task_snapshot": {
+    "objective": "Exercise an invalid nested Ultra route.",
+    "scope": ["Validate one fixture."],
+    "acceptance_criteria": ["The fixture is rejected."],
+    "risk_level": "low",
+    "side_effects": "none",
+    "evidence_refs": [],
+    "stop_conditions": ["Stop after validation."]
+  },
   "task_class": "proof_review",
   "model": "gpt-5.6-sol",
   "thinking": "ultra",

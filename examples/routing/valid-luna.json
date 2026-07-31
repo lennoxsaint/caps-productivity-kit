@@ -1,4 +1,13 @@
 {
+  "task_snapshot": {
+    "objective": "Transform the supplied fixture into validated JSON.",
+    "scope": ["Read one fixture.", "Return one transformed artifact."],
+    "acceptance_criteria": ["Every input record appears exactly once."],
+    "risk_level": "low",
+    "side_effects": "none",
+    "evidence_refs": ["fixture-contract"],
+    "stop_conditions": ["Stop if the input cannot be parsed."]
+  },
   "task_class": "transformation",
   "model": "gpt-5.6-luna",
   "thinking": "low",

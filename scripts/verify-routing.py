@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = json.loads((ROOT / "schemas/routing-decision.schema.json").read_text())
 REQUIRED = set(SCHEMA["required"])
+SNAPSHOT_REQUIRED = set(SCHEMA["properties"]["task_snapshot"]["required"])
 AUTH_REQUIRED = set(SCHEMA["properties"]["authority"]["required"])
 MODELS = set(SCHEMA["properties"]["model"]["enum"])
 THINKING = set(SCHEMA["properties"]["thinking"]["enum"])
@@ -26,6 +27,31 @@ def validate(decision: dict) -> list[str]:
     missing = REQUIRED - decision.keys()
     if missing:
         errors.append(f"missing top-level fields: {sorted(missing)}")
+    snapshot = decision.get("task_snapshot")
+    if not isinstance(snapshot, dict):
+        errors.append("task_snapshot must be an object")
+    else:
+        missing_snapshot = SNAPSHOT_REQUIRED - snapshot.keys()
+        if missing_snapshot:
+            errors.append(f"missing task_snapshot fields: {sorted(missing_snapshot)}")
+        unknown_snapshot = snapshot.keys() - SCHEMA["properties"]["task_snapshot"]["properties"].keys()
+        if unknown_snapshot:
+            errors.append(f"unknown task_snapshot fields: {sorted(unknown_snapshot)}")
+        if not isinstance(snapshot.get("objective"), str) or not snapshot.get("objective"):
+            errors.append("task_snapshot.objective must be a non-empty string")
+        for field in ("scope", "acceptance_criteria", "stop_conditions"):
+            value = snapshot.get(field)
+            if not isinstance(value, list) or not value or not all(isinstance(item, str) and item for item in value):
+                errors.append(f"task_snapshot.{field} must be a non-empty string list")
+        if snapshot.get("risk_level") not in {"low", "medium", "high"}:
+            errors.append("invalid task_snapshot.risk_level")
+        if snapshot.get("side_effects") not in {"none", "local_reversible", "external_reversible", "irreversible"}:
+            errors.append("invalid task_snapshot.side_effects")
+        evidence_refs = snapshot.get("evidence_refs")
+        if not isinstance(evidence_refs, list) or not all(
+            isinstance(item, str) and item for item in evidence_refs
+        ):
+            errors.append("task_snapshot.evidence_refs must be a string list")
     if decision.get("model") not in MODELS:
         errors.append("invalid model")
     if decision.get("thinking") not in THINKING:

@@ -61,6 +61,12 @@ source repository, use the equivalent root `docs/` and `schemas/` paths. The
 decision must include the authority envelope; it is part of the worker's
 opening task contract, not optional prompt decoration.
 
+Before routing, create the decision's redacted `task_snapshot`: objective,
+bounded scope, acceptance criteria, risk, side effects, evidence references,
+and stop conditions. Voice input must be distilled into the same fields. Keep
+ambiguity, prioritization, decomposition, and cross-lane judgment in the
+conductor; do not use a cheaper worker to discover what the task means.
+
 Choose a GPT-5.6 model and thinking level before creating every worker. Optimize
 verified successful work per minute through the acceptance gate, including
 failed probes, retries, and rework. Luna is the starting route only for precise,
@@ -112,11 +118,13 @@ For every created worker, start a redacted receipt immediately before
 receipt_id="$(python3 .caps/scripts/routing-receipt.py start \
   --task-class coding --model gpt-5.6-sol --thinking medium \
   --route-reason policy --quality-gate-id targeted-tests \
+  --task-snapshot-complete \
   --profile-version "<installed-profile-version>")"
 ```
 
 After reviewing the worker against its declared quality gate, finish the same
-receipt with `--outcome pass`, `fail`, or `abandoned`. Include retry and rework
+receipt with `--outcome pass`, `fail`, or `abandoned` and
+`--delegation-quality complete`, `partial`, or `failed`. Include retry and rework
 time and only short proof labels; never include prompts, answers, secrets,
 customer data, or private paths. A task is not routing-complete until its
 receipt is finished. If receipt recording fails, report the exact error but do
@@ -137,6 +145,11 @@ When creating a worker with `create_thread`, immediately call
 `set_thread_title` and `set_thread_pinned` on the returned id. Use short
 uppercase action-first titles, capped at 48 characters without cutting mid-word.
 Do not add a `CAPS` prefix to worker titles.
+
+When the installed title-sync automation is active, treat its project/category
+emoji and action title as coordination metadata only. Preserve manual title and
+emoji overrides. Never use a title change as proof that the worker completed,
+merged, deployed, shipped, or became live.
 
 ### Lane Tree Visualization
 
