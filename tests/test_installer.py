@@ -38,7 +38,7 @@ class InstallerTests(unittest.TestCase):
             manifest = json.loads(
                 (project / ".caps/install-manifest.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(manifest["version"], "0.3.1")
+            self.assertEqual(manifest["version"], "0.3.2")
             self.assertIn("automations/pinned-title-sync/automation.toml", manifest["managed_files"])
             self.assertIn("scripts/automation-doctor.py", manifest["managed_files"])
             self.assertNotIn("config/title-preferences.json", manifest["managed_files"])

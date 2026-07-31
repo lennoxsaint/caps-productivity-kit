@@ -115,6 +115,10 @@ class AutomationDoctorTests(unittest.TestCase):
             self.assertIn(str(project.resolve()), prompt)
             self.assertIn("native Scheduled task controls", prompt)
             self.assertIn("Never edit Codex registry files", prompt)
+            self.assertIn(
+                "ID: caps-pinned-title-sync\n   Kind: cron",
+                prompt,
+            )
             self.assertIn("FREQ=MINUTELY;INTERVAL=20", prompt)
             self.assertIn("FREQ=DAILY;BYHOUR=9;BYMINUTE=0;BYSECOND=0", prompt)
             self.assertIn("gpt-5.6-luna", prompt)
