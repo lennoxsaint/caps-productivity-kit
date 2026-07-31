@@ -13,7 +13,7 @@ from typing import Any
 AUTOMATIONS: dict[str, dict[str, str]] = {
     "caps-pinned-title-sync": {
         "directory": "pinned-title-sync",
-        "kind": "heartbeat",
+        "kind": "cron",
         "name": "CAPS pinned title sync",
         "rrule": "RRULE:FREQ=MINUTELY;INTERVAL=20",
         "model": "gpt-5.6-luna",
@@ -180,7 +180,7 @@ Execution environment: local
 
 1. CAPS pinned title sync
    ID: caps-pinned-title-sync
-   Kind: heartbeat
+   Kind: cron
    Status: ACTIVE
    Schedule: RRULE:FREQ=MINUTELY;INTERVAL=20
    Model: gpt-5.6-luna

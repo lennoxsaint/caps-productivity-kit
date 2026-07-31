@@ -88,10 +88,12 @@ material, evidence-supported task-state change.
 
 ## Evidence-gated title sync
 
-The paused `caps-pinned-title-sync` automation template runs on Luna low with a
-twenty-minute fallback. Native pin, title, or task-state events should trigger
-the same policy sooner when the runtime supports them. Events complement the
-sweep; they do not replace it.
+The paused `caps-pinned-title-sync` automation template is a project-local cron
+task that runs on Luna low every twenty minutes. It is deliberately not a
+thread-bound heartbeat: native heartbeat tasks cannot carry an independent
+model, project, or working-directory contract. Native pin, title, or task-state
+events should trigger the same policy sooner when the runtime supports them.
+Events complement the sweep; they do not replace it.
 
 The policy engine:
 

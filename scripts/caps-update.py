@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 
-UPDATER_VERSION = "0.3.1"
+UPDATER_VERSION = "0.3.2"
 DEFAULT_CHANNEL_URL = (
     "https://raw.githubusercontent.com/lennoxsaint/"
     "caps-productivity-kit/main/channels/stable.json"

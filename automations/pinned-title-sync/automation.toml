@@ -1,6 +1,6 @@
 version = 1
 id = "caps-pinned-title-sync"
-kind = "heartbeat"
+kind = "cron"
 name = "CAPS pinned title sync"
 prompt = "From the registered project working directory, read .caps/automations/pinned-title-sync/prompt.md and execute it exactly. This automation updates coordination metadata only; titles are never execution proof."
 status = "PAUSED"
