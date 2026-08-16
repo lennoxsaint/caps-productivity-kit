@@ -41,7 +41,7 @@ Pin:
 
 - `CAPS CONDUCTOR`, the first conductor thread created by the bootstrap.
 - The current conductor thread.
-- Active worker threads.
+- Active durable worker threads.
 - Release or incident threads that are still open.
 
 Unpin or archive:
@@ -67,10 +67,11 @@ Do not keep source/reference threads pinned just because they are interesting.
 Pinning is an attention claim. If it is not today work, capture the useful
 context and recommend unpinning.
 
-When thread-control tools are available, the conductor should title and pin a
-new worker immediately after `create_thread` returns an id. If title or pin
-mutation is unavailable, report the exact skipped step and give manual
-instructions.
+When thread-control tools are available, the conductor may title and pin a new
+`durable_thread` immediately after `create_thread` returns an id, after
+capability validation. A native `subagent` is same-task work and is never
+titled or pinned. If a required durable-thread control is unavailable, report
+the exact skipped step and leave the worker uncreated or in manual mode.
 
 ## Project and category emoji
 

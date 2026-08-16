@@ -85,12 +85,12 @@ class CapsUpdateTests(unittest.TestCase):
 
     def test_new_release_remains_installable_by_previous_updater(self):
         value = BUILD.build_manifest(
-            version="0.3.2",
-            artifact=Path("caps-productivity-kit-0.3.2.tar.gz"),
+            version="0.4.0",
+            artifact=Path("caps-productivity-kit-0.4.0.tar.gz"),
             digest="a" * 64,
         )
-        self.assertEqual(value["minimum_updater_version"], "0.3.0")
-        self.assertEqual(value["rollback_version"], "0.3.2")
+        self.assertEqual(value["minimum_updater_version"], "0.3.3")
+        self.assertEqual(value["rollback_version"], "0.3.3")
         self.assertIsNone(UPDATE.compatibility_error(value, "1.0"))
 
     def test_v032_updater_produces_a_verifiable_v033_install(self):
@@ -115,6 +115,53 @@ class CapsUpdateTests(unittest.TestCase):
                 result = previous.apply_update(
                     project,
                     manifest(archive, version="0.3.3"),
+                    allow_disruptive=False,
+                )
+            finally:
+                previous.fetch_bytes = original_fetch
+
+            self.assertEqual(result["status"], "updated")
+            installed_verify = subprocess.run(
+                [str(project / ".caps/scripts/verify.sh")],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(installed_verify.returncode, 0, installed_verify.stderr)
+            self.assertIn("CAPS installed layout verification passed.", installed_verify.stdout)
+
+    def test_v033_updater_produces_a_verifiable_v040_install(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            previous_path = ROOT / "tests/fixtures/caps-update-0.3.3.py"
+            previous_spec = importlib.util.spec_from_file_location("caps_update_033", previous_path)
+            previous = importlib.util.module_from_spec(previous_spec)
+            assert previous_spec.loader
+            previous_spec.loader.exec_module(previous)
+            previous.INSTALL_CONTRACT_PATH = ROOT / "tests/fixtures/install-contract-0.3.3.json"
+
+            archive_path = root / "caps-productivity-kit-0.4.0.tar.gz"
+            BUILD.build_archive(ROOT, archive_path, "0.4.0")
+            archive = archive_path.read_bytes()
+            project = self.make_project(root)
+            installed_path = project / ".caps/install-manifest.json"
+            installed = json.loads(installed_path.read_text(encoding="utf-8"))
+            installed["version"] = "0.3.3"
+            installed_path.write_text(json.dumps(installed), encoding="utf-8")
+            preferences = project / ".caps/config/title-preferences.json"
+            preferences.parent.mkdir(parents=True, exist_ok=True)
+            preferences.write_text("{}\n", encoding="utf-8")
+            original_fetch = previous.fetch_bytes
+            try:
+                previous.fetch_bytes = lambda _url: archive
+                result = previous.apply_update(
+                    project,
+                    manifest(
+                        archive,
+                        version="0.4.0",
+                        minimum_updater_version="0.3.3",
+                        rollback_version="0.3.3",
+                    ),
                     allow_disruptive=False,
                 )
             finally:

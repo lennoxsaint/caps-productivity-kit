@@ -1,0 +1,13 @@
+{
+  "snapshot_version": "1.0",
+  "captured_at": "2026-08-16T00:00:00Z",
+  "source": "caps-test-fixture",
+  "digest": "sha256:da865314924c88a6cfcda0ad760f0b72e46300b98f535baf741b79c1fb7f73dc",
+  "models": [
+    {"id": "gpt-5.6-luna", "provider": "openai", "reasoning_levels": ["low", "medium", "high"], "live": true, "entitled": true, "allowed_by_policy": true, "specialist_task_classes": []},
+    {"id": "gpt-5.6-terra", "provider": "openai", "reasoning_levels": ["medium", "high"], "live": true, "entitled": true, "allowed_by_policy": true, "specialist_task_classes": []},
+    {"id": "gpt-5.6-sol", "provider": "openai", "reasoning_levels": ["medium", "high", "xhigh", "max", "ultra"], "live": true, "entitled": true, "allowed_by_policy": true, "specialist_task_classes": []},
+    {"id": "gpt-5.5", "provider": "openai", "reasoning_levels": ["high"], "live": true, "entitled": true, "allowed_by_policy": true, "specialist_task_classes": []},
+    {"id": "daybreak-research", "provider": "daybreak", "reasoning_levels": ["high"], "live": false, "entitled": false, "allowed_by_policy": true, "specialist_task_classes": ["research_strategy"]}
+  ]
+}

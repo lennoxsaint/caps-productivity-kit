@@ -11,19 +11,25 @@ You own:
 - Clarifying the goal when needed.
 - Reading the repo instructions first.
 - Creating a done-definition for substantial work.
-- Splitting safe worker lanes.
+- Splitting safe worker work.
 - Keeping the source of truth current.
 - Reviewing worker outputs.
 - Running or requesting final verification.
 - Giving the user a concise, evidence-backed handoff.
 - Applying optional packs only when their public/private boundary is clear.
-- Creating, titling, pinning, and routing worker lanes when safe thread-control
-  tools are available.
+- Creating, titling, pinning, and routing durable worker lanes when safe
+  thread-control tools are available.
 
-## Thread-Control Capability Check
+## Worker-Control Capability Check
 
 At the start of onboarding, check whether the active Codex runtime exposes:
 
+- `spawn_agent`
+- `list_agents`
+- `send_message`
+- `followup_task`
+- `wait_agent`
+- `interrupt_agent`
 - `create_thread`
 - `send_message_to_thread`
 - `set_thread_title`
@@ -32,9 +38,12 @@ At the start of onboarding, check whether the active Codex runtime exposes:
 This is a capability check, not a dummy-thread test. Do not create a test thread
 just to prove the tools work.
 
-If any tool is unavailable, continue in manual mode. Report the exact skipped
-step and give the user copy/paste prompts and titles. Do not claim that a thread
-was created, titled, pinned, or routed unless the tool call actually succeeded.
+If a required subagent control is unavailable, report the exact limitation and
+keep that work in the conductor. Missing thread controls block only durable
+threads: continue to use available native subagents and give manual durable-
+thread instructions if the user explicitly requested one. Do not claim that a
+worker was spawned, created, titled, pinned, or routed unless the corresponding
+tool call actually succeeded.
 
 Never mutate Codex state files directly.
 
@@ -49,6 +58,38 @@ Never mutate Codex state files directly.
    - What done means
 4. Create a short plan only when the task is substantial.
 5. Execute until done or blocked by a real stop condition.
+
+## Worker Kind And Authority
+
+Declare exactly one `worker_kind` in every packet: `subagent` or
+`durable_thread`. Use `subagent` by default for bounded same-task reads,
+analysis, tests, and disjoint reversible local edits. A subagent is native
+same-task work and is never titled or pinned.
+
+Use `durable_thread` only when the user explicitly asks for it, or when the
+explicit request calls for future follow-up, separate history, a separate host
+or worktree, an ongoing incident, or release coordination. A persistence reason
+does not replace the explicit request. Validate native thread controls before
+creating one; only a validated durable thread may be titled or pinned.
+
+Within the authority already granted by the current request, automatically
+delegate qualifying bounded local reversible work with `spawn_agent`. Use
+`list_agents` to observe, `send_message` or `followup_task` to coordinate,
+`wait_agent` to await results, and `interrupt_agent` to stop a worker. Do not
+ask for per-subagent approval.
+
+Every packet must name one write owner and exact file set. Other workers may
+inspect, analyze, or test that set but may not edit it. Workers cannot delegate
+by default. An explicit packet may allow nested delegation to depth two. Ultra
+is root-only.
+
+Automatic local reads, analysis, tests, and disjoint reversible edits are
+allowed only within the packet. Prohibit external sends, production writes,
+merge, deploy, publish, credential or secret changes, irreversible actions,
+and authority widening. Stop and report before any prohibited action.
+
+Start with at most four workers. Scale to at most ten only for independent,
+deterministic, non-colliding lanes. Keep coupled work in the conductor.
 
 ## Worker Routing
 
@@ -67,29 +108,34 @@ and stop conditions. Voice input must be distilled into the same fields. Keep
 ambiguity, prioritization, decomposition, and cross-lane judgment in the
 conductor; do not use a cheaper worker to discover what the task means.
 
-Choose a GPT-5.6 model and thinking level before creating every worker. Optimize
+Choose a GPT-5.6 model and thinking level before creating every worker. Also
+validate the worker kind, requested capabilities, and `fork_turns`. Optimize
 verified successful work per minute through the acceptance gate, including
 failed probes, retries, and rework. Luna is the starting route only for precise,
 safely retryable work with deterministic verification. Terra is an evidence-
 gated exception and requires repeated `personal_eval` or `runtime_observation`
 showing it beats passing Luna and Sol routes. Use Sol when failure is costly,
 verification is weak, or integration judgment matters. Pass
-those exact `model` and `thinking` values to `create_thread` with the worker's
-self-contained prompt. For example, use the runtime's equivalent of:
+those exact `model` and `thinking` values to the worker runtime. For a durable
+thread, pass them to `create_thread` with the worker's self-contained prompt.
+For a native subagent, use `spawn_agent`. For a durable thread, use the separate
+thread control. For example:
 
 ```text
 create_thread({prompt: worker_prompt, model: "gpt-5.6-luna", thinking: "high"})
 ```
 
-Then title and pin the returned thread as described below. Do not silently
-substitute a model or thinking level. If the runtime cannot accept either
-field, use manual mode and report the exact limitation.
+Then title and pin only the validated durable thread. Do not silently
+substitute a model, thinking level, worker kind, or proof capability. If the
+runtime cannot accept a requested field, stop and report the exact limitation.
 
-Ultra is root-only. Never assign Ultra to a worker or nest Ultra delegation.
-`create_thread` workers accept explicit routes; inherited subagents may retain
-their parent route and are not a substitute for mixed-model worker creation.
+Ultra is root-only. `fork_turns` is `none` by default for mixed-model packets.
+Use a bounded positive value only when the packet explains why inherited
+context is necessary; both modes may carry an explicit model/thinking override.
+`fork_turns: all` inherits the parent model/thinking and cannot accept an
+override. No fork mode changes worker kind, authority, or file set.
 
-Use worker threads only when the work can be split safely. Give each worker:
+Give each worker:
 
 - A narrow objective.
 - Exact files or surfaces to inspect.
@@ -99,9 +145,12 @@ Use worker threads only when the work can be split safely. Give each worker:
 - Stop conditions.
 - An unpin rule.
 
-Route to existing pinned lanes before creating a new lane. Create a new worker
-only when the work is active, clear enough to execute, and not already owned by
-another lane.
+For a `subagent`, the unpin rule is `not applicable: never titled or pinned`.
+
+Route to an existing durable lane before creating a new durable lane. Create a
+new worker only when the work is active, clear enough to execute, and not
+already owned by another lane. Same-task bounded work remains a subagent and is
+not a lane in the sidebar.
 
 Reroute a worker mid-task only when it produces a material gain in quality,
 time, or failure-risk. Record the new routing decision and why the gain is
@@ -111,15 +160,36 @@ going unless the mismatch is severe.
 
 ### Runtime receipt loop
 
-For every created worker, start a redacted receipt immediately before
-`create_thread`:
+For every worker, start a redacted receipt immediately before execution. A
+receipt records only route metadata, worker kind, outcome, and short proof or
+blocker labels. Never include prompts, answers, secrets, customer data, private
+paths, or private thread IDs.
+
+Build the capability snapshot first from a fresh live Codex runtime or App
+Server catalog using `.caps/scripts/capability-snapshot.py`. The input must
+carry its runtime source and current capture time. Never treat a manually
+maintained catalog, example, screenshot, or stale snapshot as live truth.
+
+For any worker, start the receipt immediately before spawning:
 
 ```bash
 receipt_id="$(python3 .caps/scripts/routing-receipt.py start \
-  --task-class coding --model gpt-5.6-sol --thinking medium \
+  --task-class coding \
+  --requested-model gpt-5.6-sol --requested-thinking medium \
+  --resolved-model gpt-5.6-sol --resolved-thinking medium \
+  --worker-kind subagent \
+  --capability-snapshot-digest 'sha256:<live-snapshot-digest>' \
   --route-reason policy --quality-gate-id targeted-tests \
   --task-snapshot-complete \
   --profile-version "<installed-profile-version>")"
+```
+
+After `spawn_agent` or `create_thread` succeeds, bind the returned opaque worker
+reference before waiting for work:
+
+```bash
+python3 .caps/scripts/routing-receipt.py bind \
+  --receipt-id "$receipt_id" --worker-ref "<runtime-worker-ref>"
 ```
 
 After reviewing the worker against its declared quality gate, finish the same
@@ -127,8 +197,20 @@ receipt with `--outcome pass`, `fail`, or `abandoned` and
 `--delegation-quality complete`, `partial`, or `failed`. Include retry and rework
 time and only short proof labels; never include prompts, answers, secrets,
 customer data, or private paths. A task is not routing-complete until its
-receipt is finished. If receipt recording fails, report the exact error but do
-not weaken the quality gate or fabricate an outcome.
+receipt is finished. If receipt recording fails or a runtime result is
+incomplete, mark observability as `degraded`, report the exact gap, and do not
+weaken the quality gate or fabricate an outcome.
+
+```bash
+python3 .caps/scripts/routing-receipt.py finish \
+  --receipt-id "$receipt_id" --outcome pass \
+  --capability-verified --delegation-quality complete \
+  --proof-ref targeted-tests-pass
+```
+
+If spawning fails, finish the pending receipt immediately with
+`--outcome abandoned`, an appropriate failure code, and no invented task
+result.
 
 Use canary routes only for deterministic, safely retryable work. Mark them with
 `--route-reason canary` and an experiment id. Never canary external sends,
@@ -141,10 +223,11 @@ Non-OpenAI models are advisory-only planner, reviewer, or council exceptions.
 Keep them narrow, never use them as the executing worker, and record a specific
 reason in `advisory_fallback.reason`.
 
-When creating a worker with `create_thread`, immediately call
-`set_thread_title` and `set_thread_pinned` on the returned id. Use short
-uppercase action-first titles, capped at 48 characters without cutting mid-word.
-Do not add a `CAPS` prefix to worker titles.
+When creating a validated `durable_thread` with `create_thread`, immediately
+call `set_thread_title` and `set_thread_pinned` on the returned id. Use short
+uppercase action-first titles, capped at 48 characters without cutting
+mid-word. Do not add a `CAPS` prefix to worker titles. Never call title or pin
+controls for a `subagent`.
 
 When the installed title-sync automation is active, treat its project/category
 emoji and action title as coordination metadata only. Preserve manual title and
@@ -194,7 +277,7 @@ flowchart TD
 
 ### Context-Rich Routing Prompts
 
-When you route work to an existing worker thread or create a new one, do not send
+When you route work to an existing durable thread or create a new one, do not send
 a thin instruction like "continue this" or "look at that". The receiving thread
 may have none of the conductor conversation in context.
 
@@ -208,6 +291,8 @@ Every routed prompt should be self-contained enough for a cold worker:
 - Explain what the worker should not redo.
 - Define the exact outcome, output format, proof standard, and stop conditions.
 - Include whether the worker should edit files, only inspect, or return a plan.
+- Include `worker_kind`, exact model/thinking, `fork_turns`, write owner/file
+  set, capability result, delegation depth, and receipt mode.
 - Tell the worker to backfeed reusable CAPS pattern changes, blockers, proof
   paths, and public-kit sync recommendations before commit, push, deploy, send,
   publish, or unlock actions.
@@ -240,7 +325,7 @@ Before using a pack:
 - Do not import private material that is not already in the pack.
 - Do not assume shell install created, pinned, or renamed pack lanes. The
   conductor may do that later only when thread-control tools are available and
-  the user approves the lane split.
+  the user explicitly requests the durable lane.
 - Do not send, deploy, publish, or change production state unless the project
   instructions and latest user request explicitly allow it.
 

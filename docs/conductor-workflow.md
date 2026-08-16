@@ -41,12 +41,14 @@ Use workers for independent lanes:
 
 Do not create workers for tiny tasks. Coordination has a cost.
 
-For every real worker lane, choose the GPT-5.6 route and authority envelope
-before creating it. See `docs/gpt-5-6-routing.md`; the decision must conform to
-`schemas/routing-decision.schema.json`. Pass its exact `model` and `thinking`
-values to `create_thread`, then title and pin the worker. The authority envelope
-is an action-time guardrail: it names what the worker may do, may not do, must
-prove, and must stop for.
+For every real worker packet, choose `worker_kind`, the GPT-5.6 route, and
+authority envelope before creating it. See `docs/gpt-5-6-routing.md`; the
+decision must conform to `schemas/routing-decision.schema.json`. Pass exact
+`model`, `thinking`, and `fork_turns` values to the requested worker kind. Only
+a validated `durable_thread` may be titled and pinned. A native `subagent` is
+same-task work and is never titled or pinned. The authority envelope is an
+action-time guardrail: it names what the worker may do, may not do, must prove,
+and must stop for.
 
 Complete the decision's redacted task snapshot before routing. The conductor
 owns task understanding, decomposition, risk, acceptance criteria, and stop
@@ -64,22 +66,23 @@ task needs a dynamic harness. A harness is a temporary task organization with
 explicit evidence sources, split roles, verifier rubrics, stop conditions, and
 proof-state targets. See `docs/dynamic-harnesses.md`.
 
-Route to existing active lanes before creating new ones. A pinned worker thread
-should own a bounded outcome, not a vague topic. If an existing lane already owns
+Route to existing active durable lanes before creating new ones. A pinned worker
+thread should own a bounded outcome, not a vague topic. If an existing lane already owns
 the repo, product area, or proof path, continue that lane instead of starting a
 duplicate.
 
 When the active Codex runtime exposes safe thread-control tools, the conductor
-may create worker lanes directly after the user approves the split:
+may create approved durable worker lanes directly after the user approves the split:
 
 - Use `create_thread` for the worker.
-- Immediately call `set_thread_title` on the returned id.
-- Immediately call `set_thread_pinned` on the returned id.
+- Immediately call `set_thread_title` and `set_thread_pinned` only for a
+  validated `durable_thread` returned by `create_thread`.
 - Use action-first uppercase titles capped at 48 characters.
 - Report the thread id, title status, and pin status.
 
-If those tools are unavailable, continue in manual mode. Give the user the
-worker title and copy/paste prompt, and name the exact skipped tool step.
+If those tools are unavailable, continue in manual mode for durable threads.
+Give the user the worker title and copy/paste prompt, and name the exact
+skipped tool step. Do not title or pin a subagent.
 
 Do not mutate Codex state files directly.
 
@@ -89,7 +92,7 @@ New lanes need:
 - The right workspace or repo.
 - A stop condition.
 - An evidence contract.
-- An unpin rule.
+- An unpin rule (or `not applicable` for a subagent).
 
 Every routed prompt must carry enough context for a cold worker thread. Include:
 

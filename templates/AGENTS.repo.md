@@ -70,6 +70,14 @@ Never:
 - Commit `.env` files.
 - Hide failing tests.
 
+For CAPS worker packets, the default worker kind is native `subagent` and it is
+never titled or pinned. A `durable_thread` requires a qualifying persistence
+reason and validated native controls. Name one write owner and exact file set;
+do not silently widen them. Local reads, analysis, tests, and disjoint
+reversible edits are allowed. External sends, production writes, merge,
+deploy, publish, credentials, irreversible actions, and authority widening are
+prohibited unless separately approved.
+
 ## Definition Of Done
 
 A task is done when:
