@@ -100,6 +100,22 @@ class InstalledVerifierTests(unittest.TestCase):
                 result.stderr,
             )
 
+    def test_installed_layout_requires_every_contract_file_in_the_manifest(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            project = self.install_project(Path(temporary))
+            manifest_path = project / ".caps/install-manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["managed_files"].pop("docs/dynamic-harnesses.md")
+            manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+            result = self.run_installed_verifier(project)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(
+                "Required installed file is not managed: docs/dynamic-harnesses.md",
+                result.stderr,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

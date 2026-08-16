@@ -41,6 +41,7 @@ def release_archive(version: str = "0.3.2") -> bytes:
         "templates/example.md": b"template\n",
         "tests/installed/test_installed_commands.py": b"print('installed test')\n",
         "VERSION": f"{version}\n".encode(),
+        "config/installed-files.json": b'{"schema_version":"1.0","managed_files":[]}\n',
         "config/title-preferences.json": b"{}\n",
     }
     raw = io.BytesIO()
@@ -134,6 +135,35 @@ class CapsUpdateTests(unittest.TestCase):
             self.assertTrue(
                 (project / ".caps/tests/installed/test_installed_commands.py").exists()
             )
+            installed = json.loads(
+                (project / ".caps/install-manifest.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(installed["managed_files"]["docs/example.md"], digest(b"new docs\n"))
+
+    def test_apply_records_incoming_baseline_for_preexisting_unmanaged_override(self):
+        archive = release_archive()
+        with tempfile.TemporaryDirectory() as temporary:
+            project = self.make_project(Path(temporary))
+            script = project / ".caps/scripts/example.py"
+            script.parent.mkdir(parents=True)
+            script.write_bytes(b"owner script\n")
+            original_fetch = UPDATE.fetch_bytes
+            try:
+                UPDATE.fetch_bytes = lambda _url: archive
+                result = UPDATE.apply_update(project, manifest(archive), allow_disruptive=False)
+            finally:
+                UPDATE.fetch_bytes = original_fetch
+
+            self.assertEqual(result["status"], "updated")
+            self.assertEqual(script.read_bytes(), b"owner script\n")
+            installed = json.loads(
+                (project / ".caps/install-manifest.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                installed["managed_files"]["scripts/example.py"],
+                digest(b"print('ok')\n"),
+            )
+            self.assertIn("scripts/example.py", installed["local_overrides"])
 
     def test_apply_adopts_matching_release_bytes_without_overwrite_or_override(self):
         archive = release_archive()

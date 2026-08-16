@@ -1,5 +1,5 @@
 {
-  "artifact_sha256": "c43ed0f6a36f380c3e4052a0adeba8b9a1076d90d9bd0d9db0658b5a7d85670d",
+  "artifact_sha256": "f5a596a277f1599a4928523ff58e77bca66f47e6eba4fc154bd4d17e1da9bbee",
   "artifact_url": "https://github.com/lennoxsaint/caps-productivity-kit/releases/download/v0.3.3/caps-productivity-kit-0.3.3.tar.gz",
   "channel": "stable",
   "disruptive": false,

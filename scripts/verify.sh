@@ -4,69 +4,8 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 verify_installed_layout() {
-  local required_files=(
-    "VERSION"
-    "install-manifest.json"
-    "automations/pinned-title-sync/automation.toml"
-    "automations/pinned-title-sync/prompt.md"
-    "automations/caps-update/automation.toml"
-    "automations/caps-update/prompt.md"
-    "bootstrap/start-caps-conductor.md"
-    "config/title-preferences.json"
-    "defaults/title-preferences.json"
-    "docs/setup-guide.md"
-    "docs/naming-and-pinning.md"
-    "docs/updates.md"
-    "docs/conductor-workflow.md"
-    "docs/gpt-5-6-routing.md"
-    "docs/adr/0001-public-routing-engine-private-profile.md"
-    "docs/operator-loop.md"
-    "docs/evidence-and-handoffs.md"
-    "docs/adjacent-repos.md"
-    "docs/packs.md"
-    "examples/feature-build/README.md"
-    "examples/release-check/README.md"
-    "examples/routing/valid-luna.json"
-    "examples/routing/valid-terra.json"
-    "examples/routing/valid-sol-max.json"
-    "examples/routing/valid-sol-ultra.json"
-    "examples/routing/invalid-missing-authority.json"
-    "examples/routing/routing-cases.json"
-    "prompts/bootstrap-caps-conductor.md"
-    "prompts/conductor.md"
-    "prompts/adjacent-repo-router.md"
-    "prompts/workers/implementation.md"
-    "prompts/workers/research.md"
-    "prompts/workers/qa.md"
-    "prompts/workers/docs.md"
-    "prompts/workers/review.md"
-    "schemas/routing-decision.schema.json"
-    "schemas/routing-receipt.schema.json"
-    "scripts/automation-doctor.py"
-    "scripts/caps-update.py"
-    "scripts/evaluate-routing-receipts.py"
-    "scripts/pinned-thread-snapshot.py"
-    "scripts/routing-receipt.py"
-    "scripts/title-sync-policy.py"
-    "scripts/verify-routing.py"
-    "scripts/verify.sh"
-    "templates/AGENTS.caps-lane-factory.md"
-    "templates/AGENTS.global.md"
-    "templates/AGENTS.repo.md"
-    "templates/adjacent-repo-link.md"
-    "tests/installed/test_installed_commands.py"
-  )
-  local missing=0
-  local file
-  for file in "${required_files[@]}"; do
-    if [[ ! -f "$root/$file" ]]; then
-      echo "Missing installed file: $file" >&2
-      missing=1
-    fi
-  done
-  if [[ "$missing" -ne 0 ]]; then
-    return 1
-  fi
+  [[ -f "$root/install-manifest.json" ]] || { echo "Missing installed file: install-manifest.json" >&2; return 1; }
+  [[ -f "$root/config/installed-files.json" ]] || { echo "Missing installed file: config/installed-files.json" >&2; return 1; }
 
   bash -n "$root/scripts/verify.sh"
   python3 - "$root" <<'PY'
@@ -78,10 +17,15 @@ import sys
 
 root = pathlib.Path(sys.argv[1]).resolve()
 manifest_path = root / "install-manifest.json"
+contract_path = root / "config/installed-files.json"
 try:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 except (OSError, json.JSONDecodeError) as error:
     raise SystemExit(f"Invalid install manifest: {error}")
+try:
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as error:
+    raise SystemExit(f"Invalid installed-file contract: {error}")
 
 if not isinstance(manifest, dict) or manifest.get("schema_version") != "1.0":
     raise SystemExit("Invalid install manifest schema")
@@ -94,56 +38,14 @@ if not isinstance(overrides, list) or any(not isinstance(item, str) for item in 
 if len(overrides) != len(set(overrides)):
     raise SystemExit("Duplicate local override declaration")
 
-required_managed = {
-    "VERSION",
-    "automations/pinned-title-sync/automation.toml",
-    "automations/pinned-title-sync/prompt.md",
-    "automations/caps-update/automation.toml",
-    "automations/caps-update/prompt.md",
-    "bootstrap/start-caps-conductor.md",
-    "defaults/title-preferences.json",
-    "docs/setup-guide.md",
-    "docs/naming-and-pinning.md",
-    "docs/updates.md",
-    "docs/conductor-workflow.md",
-    "docs/gpt-5-6-routing.md",
-    "docs/adr/0001-public-routing-engine-private-profile.md",
-    "docs/operator-loop.md",
-    "docs/evidence-and-handoffs.md",
-    "docs/adjacent-repos.md",
-    "docs/packs.md",
-    "examples/feature-build/README.md",
-    "examples/release-check/README.md",
-    "examples/routing/valid-luna.json",
-    "examples/routing/valid-terra.json",
-    "examples/routing/valid-sol-max.json",
-    "examples/routing/valid-sol-ultra.json",
-    "examples/routing/invalid-missing-authority.json",
-    "examples/routing/routing-cases.json",
-    "prompts/bootstrap-caps-conductor.md",
-    "prompts/conductor.md",
-    "prompts/adjacent-repo-router.md",
-    "prompts/workers/implementation.md",
-    "prompts/workers/research.md",
-    "prompts/workers/qa.md",
-    "prompts/workers/docs.md",
-    "prompts/workers/review.md",
-    "schemas/routing-decision.schema.json",
-    "schemas/routing-receipt.schema.json",
-    "scripts/automation-doctor.py",
-    "scripts/caps-update.py",
-    "scripts/evaluate-routing-receipts.py",
-    "scripts/pinned-thread-snapshot.py",
-    "scripts/routing-receipt.py",
-    "scripts/title-sync-policy.py",
-    "scripts/verify-routing.py",
-    "scripts/verify.sh",
-    "templates/AGENTS.caps-lane-factory.md",
-    "templates/AGENTS.global.md",
-    "templates/AGENTS.repo.md",
-    "templates/adjacent-repo-link.md",
-    "tests/installed/test_installed_commands.py",
-}
+if not isinstance(contract, dict) or contract.get("schema_version") != "1.0":
+    raise SystemExit("Invalid installed-file contract schema")
+contract_files = contract.get("managed_files")
+if not isinstance(contract_files, list) or any(not isinstance(item, str) for item in contract_files):
+    raise SystemExit("Invalid installed-file contract managed_files")
+required_managed = set(contract_files)
+if len(required_managed) != len(contract_files):
+    raise SystemExit("Duplicate installed-file contract entry")
 for relative in sorted(required_managed - managed.keys()):
     print(f"Required installed file is not managed: {relative}", file=sys.stderr)
 if required_managed - managed.keys():
@@ -277,6 +179,7 @@ required_files=(
   "scripts/pinned-thread-snapshot.py"
   "scripts/build-release.py"
   "tests/installed/test_installed_commands.py"
+  "config/installed-files.json"
   "config/title-preferences.json"
   "automations/pinned-title-sync/automation.toml"
   "automations/pinned-title-sync/prompt.md"
@@ -304,6 +207,32 @@ fi
 
 bash -n "$root/install.sh"
 bash -n "$root/scripts/verify.sh"
+python3 - "$root" <<'PY'
+import importlib.util
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1]).resolve()
+spec = importlib.util.spec_from_file_location("caps_update", root / "scripts/caps-update.py")
+caps_update = importlib.util.module_from_spec(spec)
+assert spec.loader
+spec.loader.exec_module(caps_update)
+contract = json.loads((root / "config/installed-files.json").read_text(encoding="utf-8"))
+declared = contract.get("managed_files") if isinstance(contract, dict) else None
+if contract.get("schema_version") != "1.0" or not isinstance(declared, list):
+    raise SystemExit("Invalid installed-file contract")
+actual = set(caps_update.release_managed_files(root))
+expected = set(declared)
+if len(expected) != len(declared):
+    raise SystemExit("Duplicate installed-file contract entry")
+for relative in sorted(actual - expected):
+    print(f"Mapped file missing from installed-file contract: {relative}", file=sys.stderr)
+for relative in sorted(expected - actual):
+    print(f"Installed-file contract path is not mapped: {relative}", file=sys.stderr)
+if actual != expected:
+    raise SystemExit(1)
+PY
 python3 "$root/scripts/verify-routing.py"
 python3 -m unittest discover -s "$root/tests" -v
 

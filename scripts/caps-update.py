@@ -33,6 +33,7 @@ SOURCE_MAPPINGS = {
     "templates": "templates",
     "tests/installed": "tests/installed",
     "VERSION": "VERSION",
+    "config/installed-files.json": "config/installed-files.json",
     "config/title-preferences.json": "defaults/title-preferences.json",
     "prompts/bootstrap-caps-conductor.md": "bootstrap/start-caps-conductor.md",
 }
@@ -252,12 +253,14 @@ def apply_update(project: Path, manifest: dict[str, Any], allow_disruptive: bool
                     installed_hash = expected.get(relative)
                     if installed_hash is None:
                         preserved.append(relative)
+                        new_hashes[relative] = source_hash
                         continue
                     if current_hash != installed_hash:
                         if current_hash == source_hash:
                             new_hashes[relative] = source_hash
                             continue
                         preserved.append(relative)
+                        new_hashes[relative] = source_hash
                         continue
                     backup = backup_root / "files" / relative
                     backup.parent.mkdir(parents=True, exist_ok=True)
