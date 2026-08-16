@@ -4,6 +4,8 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
+import subprocess
 import tarfile
 import tempfile
 import unittest
@@ -38,6 +40,8 @@ def release_archive(version: str = "0.3.2") -> bytes:
         "schemas/example.json": b"{}\n",
         "scripts/example.py": b"print('ok')\n",
         "templates/example.md": b"template\n",
+        "scripts/install-contract.json": b'{"schema_version":"1.0","source_mappings":{"scripts":"scripts"},"required_unmanaged_files":[],"managed_files":[]}\n',
+        "scripts/installed-tests/test_installed_commands.py": b"print('installed test')\n",
         "VERSION": f"{version}\n".encode(),
         "config/title-preferences.json": b"{}\n",
     }
@@ -86,8 +90,45 @@ class CapsUpdateTests(unittest.TestCase):
             digest="a" * 64,
         )
         self.assertEqual(value["minimum_updater_version"], "0.3.0")
-        self.assertEqual(value["rollback_version"], "0.3.1")
+        self.assertEqual(value["rollback_version"], "0.3.2")
         self.assertIsNone(UPDATE.compatibility_error(value, "1.0"))
+
+    def test_v032_updater_produces_a_verifiable_v033_install(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            previous_path = ROOT / "tests/fixtures/caps-update-0.3.2.py"
+            previous_spec = importlib.util.spec_from_file_location("caps_update_032", previous_path)
+            previous = importlib.util.module_from_spec(previous_spec)
+            assert previous_spec.loader
+            previous_spec.loader.exec_module(previous)
+
+            archive_path = root / "caps-productivity-kit-0.3.3.tar.gz"
+            BUILD.build_archive(ROOT, archive_path, "0.3.3")
+            archive = archive_path.read_bytes()
+            project = self.make_project(root)
+            preferences = project / ".caps/config/title-preferences.json"
+            preferences.parent.mkdir(parents=True, exist_ok=True)
+            preferences.write_text("{}\n", encoding="utf-8")
+            original_fetch = previous.fetch_bytes
+            try:
+                previous.fetch_bytes = lambda _url: archive
+                result = previous.apply_update(
+                    project,
+                    manifest(archive, version="0.3.3"),
+                    allow_disruptive=False,
+                )
+            finally:
+                previous.fetch_bytes = original_fetch
+
+            self.assertEqual(result["status"], "updated")
+            installed_verify = subprocess.run(
+                [str(project / ".caps/scripts/verify.sh")],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(installed_verify.returncode, 0, installed_verify.stderr)
+            self.assertIn("CAPS installed layout verification passed.", installed_verify.stdout)
 
     def make_project(self, root: Path, local_docs: bytes = b"old docs\n") -> Path:
         project = root / "project"
@@ -129,6 +170,63 @@ class CapsUpdateTests(unittest.TestCase):
             )
             self.assertIn("docs/example.md", result["local_overrides_preserved"])
             self.assertTrue((project / ".caps/scripts/example.py").exists())
+            self.assertTrue(
+                (project / ".caps/scripts/installed-tests/test_installed_commands.py").exists()
+            )
+            installed = json.loads(
+                (project / ".caps/install-manifest.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(installed["managed_files"]["docs/example.md"], digest(b"new docs\n"))
+
+    def test_apply_records_incoming_baseline_for_preexisting_unmanaged_override(self):
+        archive = release_archive()
+        with tempfile.TemporaryDirectory() as temporary:
+            project = self.make_project(Path(temporary))
+            script = project / ".caps/scripts/example.py"
+            script.parent.mkdir(parents=True)
+            script.write_bytes(b"owner script\n")
+            original_fetch = UPDATE.fetch_bytes
+            try:
+                UPDATE.fetch_bytes = lambda _url: archive
+                result = UPDATE.apply_update(project, manifest(archive), allow_disruptive=False)
+            finally:
+                UPDATE.fetch_bytes = original_fetch
+
+            self.assertEqual(result["status"], "updated")
+            self.assertEqual(script.read_bytes(), b"owner script\n")
+            installed = json.loads(
+                (project / ".caps/install-manifest.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                installed["managed_files"]["scripts/example.py"],
+                digest(b"print('ok')\n"),
+            )
+            self.assertIn("scripts/example.py", installed["local_overrides"])
+
+    def test_apply_adopts_matching_release_bytes_without_overwrite_or_override(self):
+        archive = release_archive()
+        with tempfile.TemporaryDirectory() as temporary:
+            project = self.make_project(Path(temporary), local_docs=b"new docs\n")
+            docs = project / ".caps/docs/example.md"
+            original_timestamp_ns = 1_700_000_000_000_000_000
+            os.utime(docs, ns=(original_timestamp_ns, original_timestamp_ns))
+            original_fetch = UPDATE.fetch_bytes
+            try:
+                UPDATE.fetch_bytes = lambda _url: archive
+                result = UPDATE.apply_update(project, manifest(archive), allow_disruptive=False)
+            finally:
+                UPDATE.fetch_bytes = original_fetch
+
+            self.assertEqual(result["status"], "updated")
+            self.assertEqual(docs.read_bytes(), b"new docs\n")
+            self.assertEqual(docs.stat().st_mtime_ns, original_timestamp_ns)
+            self.assertNotIn("docs/example.md", result["updated_files"])
+            self.assertNotIn("docs/example.md", result["local_overrides_preserved"])
+            installed = json.loads(
+                (project / ".caps/install-manifest.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(installed["managed_files"]["docs/example.md"], digest(b"new docs\n"))
+            self.assertNotIn("docs/example.md", installed["local_overrides"])
 
     def test_digest_failure_keeps_installed_files(self):
         archive = release_archive()

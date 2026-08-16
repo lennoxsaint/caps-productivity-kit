@@ -52,6 +52,22 @@ def thread(**overrides) -> dict:
 
 
 class TitleSyncPolicyTests(unittest.TestCase):
+    def test_material_change_does_not_add_only_an_emoji(self):
+        decision = POLICY.evaluate_thread(
+            thread(
+                current_title="BUILD THE ROUTER",
+                project="project",
+                category="build",
+                state_revision="revision-2",
+                proposed_action_title="BUILD THE ROUTER",
+            ),
+            config(),
+            {"threads": {}},
+            NOW,
+        )
+        self.assertEqual(decision["action"], "skip")
+        self.assertEqual(decision["reason"], "title_already_current")
+
     def test_project_emoji_precedes_category(self):
         decision = POLICY.evaluate_thread(thread(), config(), {"threads": {}}, NOW)
         self.assertEqual(decision["action"], "rename")
@@ -105,6 +121,22 @@ class TitleSyncPolicyTests(unittest.TestCase):
             NOW,
         )
         self.assertEqual(second["reason"], "state_already_reconciled")
+
+    def test_unchanged_result_checkpoints_observed_revision(self):
+        state = {"schema_version": "1.0", "threads": {}}
+        POLICY.record_result(
+            state,
+            {
+                "thread_id": "thread-1",
+                "outcome": "unchanged",
+                "state_revision": "updated_at:20",
+            },
+            NOW,
+        )
+        self.assertEqual(
+            state["threads"]["thread-1"]["last_state_revision"],
+            "updated_at:20",
+        )
 
     def test_rate_limit_blocks_distinct_revision(self):
         state = {

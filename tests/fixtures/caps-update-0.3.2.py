@@ -17,24 +17,24 @@ from pathlib import Path
 from typing import Any
 
 
-UPDATER_VERSION = "0.3.3"
+UPDATER_VERSION = "0.3.2"
 DEFAULT_CHANNEL_URL = (
     "https://raw.githubusercontent.com/lennoxsaint/"
     "caps-productivity-kit/main/channels/stable.json"
 )
 INSTALL_SCHEMA = "1.0"
-INSTALL_CONTRACT_PATH = Path(__file__).resolve().with_name("install-contract.json")
-
-
-def source_mappings() -> dict[str, str]:
-    contract = read_json(INSTALL_CONTRACT_PATH)
-    mappings = contract.get("source_mappings")
-    if not isinstance(mappings, dict) or any(
-        not isinstance(source, str) or not isinstance(target, str)
-        for source, target in mappings.items()
-    ):
-        raise RuntimeError("invalid_install_contract_source_mappings")
-    return mappings
+SOURCE_MAPPINGS = {
+    "automations": "automations",
+    "docs": "docs",
+    "examples": "examples",
+    "prompts": "prompts",
+    "schemas": "schemas",
+    "scripts": "scripts",
+    "templates": "templates",
+    "VERSION": "VERSION",
+    "config/title-preferences.json": "defaults/title-preferences.json",
+    "prompts/bootstrap-caps-conductor.md": "bootstrap/start-caps-conductor.md",
+}
 
 
 def version_tuple(value: str) -> tuple[int, ...]:
@@ -143,7 +143,7 @@ def safe_extract(archive: Path, destination: Path) -> Path:
 
 def release_managed_files(release_root: Path) -> dict[str, Path]:
     files: dict[str, Path] = {}
-    for source_name, target_name in source_mappings().items():
+    for source_name, target_name in SOURCE_MAPPINGS.items():
         source = release_root / source_name
         if not source.exists():
             raise RuntimeError(f"release_missing_required_path:{source_name}")
@@ -249,16 +249,8 @@ def apply_update(project: Path, manifest: dict[str, Any], allow_disruptive: bool
                 if target.exists():
                     current_hash = sha256(target)
                     installed_hash = expected.get(relative)
-                    if installed_hash is None:
+                    if installed_hash is None or current_hash != installed_hash:
                         preserved.append(relative)
-                        new_hashes[relative] = source_hash
-                        continue
-                    if current_hash != installed_hash:
-                        if current_hash == source_hash:
-                            new_hashes[relative] = source_hash
-                            continue
-                        preserved.append(relative)
-                        new_hashes[relative] = source_hash
                         continue
                     backup = backup_root / "files" / relative
                     backup.parent.mkdir(parents=True, exist_ok=True)

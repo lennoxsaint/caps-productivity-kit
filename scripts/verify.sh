@@ -3,6 +3,125 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+verify_installed_layout() {
+  [[ -f "$root/install-manifest.json" ]] || { echo "Missing installed file: install-manifest.json" >&2; return 1; }
+  [[ -f "$root/scripts/install-contract.json" ]] || { echo "Missing installed file: scripts/install-contract.json" >&2; return 1; }
+
+  bash -n "$root/scripts/verify.sh"
+  python3 - "$root" <<'PY'
+import hashlib
+import json
+import pathlib
+import re
+import sys
+
+root = pathlib.Path(sys.argv[1]).resolve()
+manifest_path = root / "install-manifest.json"
+contract_path = root / "scripts/install-contract.json"
+try:
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as error:
+    raise SystemExit(f"Invalid install manifest: {error}")
+try:
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as error:
+    raise SystemExit(f"Invalid installed-file contract: {error}")
+
+if not isinstance(manifest, dict) or manifest.get("schema_version") != "1.0":
+    raise SystemExit("Invalid install manifest schema")
+managed = manifest.get("managed_files")
+overrides = manifest.get("local_overrides")
+if not isinstance(managed, dict):
+    raise SystemExit("Invalid install manifest managed_files")
+if not isinstance(overrides, list) or any(not isinstance(item, str) for item in overrides):
+    raise SystemExit("Invalid install manifest local_overrides")
+if len(overrides) != len(set(overrides)):
+    raise SystemExit("Duplicate local override declaration")
+
+if not isinstance(contract, dict) or contract.get("schema_version") != "1.0":
+    raise SystemExit("Invalid installed-file contract schema")
+contract_files = contract.get("managed_files")
+if not isinstance(contract_files, list) or any(not isinstance(item, str) for item in contract_files):
+    raise SystemExit("Invalid installed-file contract managed_files")
+required_managed = set(contract_files)
+if len(required_managed) != len(contract_files):
+    raise SystemExit("Duplicate installed-file contract entry")
+required_unmanaged = contract.get("required_unmanaged_files")
+if not isinstance(required_unmanaged, list) or any(not isinstance(item, str) for item in required_unmanaged):
+    raise SystemExit("Invalid installed-file contract required_unmanaged_files")
+for relative in required_unmanaged:
+    if not (root / pathlib.PurePosixPath(relative)).is_file():
+        print(f"Missing required unmanaged file: {relative}", file=sys.stderr)
+        raise SystemExit(1)
+for relative in sorted(required_managed - managed.keys()):
+    print(f"Required installed file is not managed: {relative}", file=sys.stderr)
+if required_managed - managed.keys():
+    raise SystemExit(1)
+
+override_set = set(overrides)
+for relative in sorted(override_set - managed.keys()):
+    print(f"Invalid local override: {relative}", file=sys.stderr)
+if override_set - managed.keys():
+    raise SystemExit(1)
+
+failed = False
+for relative, expected in sorted(managed.items()):
+    if not isinstance(relative, str) or not isinstance(expected, str):
+        print("Invalid managed file entry", file=sys.stderr)
+        failed = True
+        continue
+    relative_path = pathlib.PurePosixPath(relative)
+    if relative_path.is_absolute() or ".." in relative_path.parts:
+        print(f"Invalid managed file path: {relative}", file=sys.stderr)
+        failed = True
+        continue
+    if not re.fullmatch(r"[0-9a-f]{64}", expected):
+        print(f"Invalid managed file hash: {relative}", file=sys.stderr)
+        failed = True
+        continue
+    target = root / relative_path
+    if not target.is_file():
+        print(f"Missing managed file: {relative}", file=sys.stderr)
+        failed = True
+        continue
+    resolved_target = target.resolve()
+    if resolved_target != root and root not in resolved_target.parents:
+        print(f"Managed file escapes installed root: {relative}", file=sys.stderr)
+        failed = True
+        continue
+    actual = hashlib.sha256(target.read_bytes()).hexdigest()
+    if relative in override_set:
+        print(f"Declared local override: {relative}")
+    elif actual != expected:
+        print(f"Managed file hash mismatch: {relative}", file=sys.stderr)
+        failed = True
+
+for schema_name in ("routing-decision.schema.json", "routing-receipt.schema.json"):
+    schema_path = root / "schemas" / schema_name
+    try:
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"Invalid schema {schema_name}: {error}", file=sys.stderr)
+        failed = True
+        continue
+    if not isinstance(schema, dict) or schema.get("type") != "object":
+        print(f"Invalid schema root: {schema_name}", file=sys.stderr)
+        failed = True
+
+if failed:
+    raise SystemExit(1)
+PY
+
+  python3 "$root/scripts/verify-routing.py"
+  python3 -m unittest discover -s "$root/scripts/installed-tests" -v
+  echo "CAPS installed layout verification passed."
+}
+
+if [[ -f "$root/install-manifest.json" ]]; then
+  verify_installed_layout
+  exit 0
+fi
+
 required_files=(
   "README.md"
   "AGENTS.md"
@@ -64,7 +183,10 @@ required_files=(
   "scripts/title-sync-policy.py"
   "scripts/automation-doctor.py"
   "scripts/caps-update.py"
+  "scripts/pinned-thread-snapshot.py"
   "scripts/build-release.py"
+  "scripts/installed-tests/test_installed_commands.py"
+  "scripts/install-contract.json"
   "config/title-preferences.json"
   "automations/pinned-title-sync/automation.toml"
   "automations/pinned-title-sync/prompt.md"
@@ -92,6 +214,32 @@ fi
 
 bash -n "$root/install.sh"
 bash -n "$root/scripts/verify.sh"
+python3 - "$root" <<'PY'
+import importlib.util
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1]).resolve()
+spec = importlib.util.spec_from_file_location("caps_update", root / "scripts/caps-update.py")
+caps_update = importlib.util.module_from_spec(spec)
+assert spec.loader
+spec.loader.exec_module(caps_update)
+contract = json.loads((root / "scripts/install-contract.json").read_text(encoding="utf-8"))
+declared = contract.get("managed_files") if isinstance(contract, dict) else None
+if contract.get("schema_version") != "1.0" or not isinstance(declared, list):
+    raise SystemExit("Invalid installed-file contract")
+actual = set(caps_update.release_managed_files(root))
+expected = set(declared)
+if len(expected) != len(declared):
+    raise SystemExit("Duplicate installed-file contract entry")
+for relative in sorted(actual - expected):
+    print(f"Mapped file missing from installed-file contract: {relative}", file=sys.stderr)
+for relative in sorted(expected - actual):
+    print(f"Installed-file contract path is not mapped: {relative}", file=sys.stderr)
+if actual != expected:
+    raise SystemExit(1)
+PY
 python3 "$root/scripts/verify-routing.py"
 python3 -m unittest discover -s "$root/tests" -v
 
