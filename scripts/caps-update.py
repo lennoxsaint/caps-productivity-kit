@@ -23,7 +23,7 @@ DEFAULT_CHANNEL_URL = (
     "caps-productivity-kit/main/channels/stable.json"
 )
 INSTALL_SCHEMA = "1.0"
-INSTALL_CONTRACT_PATH = Path(__file__).resolve().parents[1] / "config/installed-files.json"
+INSTALL_CONTRACT_PATH = Path(__file__).resolve().with_name("install-contract.json")
 
 
 def source_mappings() -> dict[str, str]:

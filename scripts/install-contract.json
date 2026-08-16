@@ -2,7 +2,6 @@
   "schema_version": "1.0",
   "source_mappings": {
     "automations": "automations",
-    "config/installed-files.json": "config/installed-files.json",
     "config/title-preferences.json": "defaults/title-preferences.json",
     "docs": "docs",
     "examples": "examples",
@@ -11,7 +10,6 @@
     "schemas": "schemas",
     "scripts": "scripts",
     "templates": "templates",
-    "tests/installed": "tests/installed",
     "VERSION": "VERSION"
   },
   "required_unmanaged_files": [
@@ -24,7 +22,6 @@
     "automations/pinned-title-sync/automation.toml",
     "automations/pinned-title-sync/prompt.md",
     "bootstrap/start-caps-conductor.md",
-    "config/installed-files.json",
     "defaults/title-preferences.json",
     "docs/adjacent-repos.md",
     "docs/adr/0001-public-routing-engine-private-profile.md",
@@ -62,6 +59,8 @@
     "scripts/build-release.py",
     "scripts/caps-update.py",
     "scripts/evaluate-routing-receipts.py",
+    "scripts/install-contract.json",
+    "scripts/installed-tests/test_installed_commands.py",
     "scripts/pinned-thread-snapshot.py",
     "scripts/routing-receipt.py",
     "scripts/title-sync-policy.py",
@@ -70,7 +69,6 @@
     "templates/AGENTS.caps-lane-factory.md",
     "templates/AGENTS.global.md",
     "templates/AGENTS.repo.md",
-    "templates/adjacent-repo-link.md",
-    "tests/installed/test_installed_commands.py"
+    "templates/adjacent-repo-link.md"
   ]
 }

@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 import os
+import subprocess
 import tarfile
 import tempfile
 import unittest
@@ -39,9 +40,9 @@ def release_archive(version: str = "0.3.2") -> bytes:
         "schemas/example.json": b"{}\n",
         "scripts/example.py": b"print('ok')\n",
         "templates/example.md": b"template\n",
-        "tests/installed/test_installed_commands.py": b"print('installed test')\n",
+        "scripts/install-contract.json": b'{"schema_version":"1.0","source_mappings":{"scripts":"scripts"},"required_unmanaged_files":[],"managed_files":[]}\n',
+        "scripts/installed-tests/test_installed_commands.py": b"print('installed test')\n",
         "VERSION": f"{version}\n".encode(),
-        "config/installed-files.json": b'{"schema_version":"1.0","managed_files":[]}\n',
         "config/title-preferences.json": b"{}\n",
     }
     raw = io.BytesIO()
@@ -92,6 +93,51 @@ class CapsUpdateTests(unittest.TestCase):
         self.assertEqual(value["rollback_version"], "0.3.2")
         self.assertIsNone(UPDATE.compatibility_error(value, "1.0"))
 
+    def test_v032_updater_produces_a_verifiable_v033_install(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            previous_source = subprocess.run(
+                ["git", "show", "v0.3.2:scripts/caps-update.py"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout
+            previous_path = root / "caps-update-0.3.2.py"
+            previous_path.write_text(previous_source, encoding="utf-8")
+            previous_spec = importlib.util.spec_from_file_location("caps_update_032", previous_path)
+            previous = importlib.util.module_from_spec(previous_spec)
+            assert previous_spec.loader
+            previous_spec.loader.exec_module(previous)
+
+            archive_path = root / "caps-productivity-kit-0.3.3.tar.gz"
+            BUILD.build_archive(ROOT, archive_path, "0.3.3")
+            archive = archive_path.read_bytes()
+            project = self.make_project(root)
+            preferences = project / ".caps/config/title-preferences.json"
+            preferences.parent.mkdir(parents=True, exist_ok=True)
+            preferences.write_text("{}\n", encoding="utf-8")
+            original_fetch = previous.fetch_bytes
+            try:
+                previous.fetch_bytes = lambda _url: archive
+                result = previous.apply_update(
+                    project,
+                    manifest(archive, version="0.3.3"),
+                    allow_disruptive=False,
+                )
+            finally:
+                previous.fetch_bytes = original_fetch
+
+            self.assertEqual(result["status"], "updated")
+            installed_verify = subprocess.run(
+                [str(project / ".caps/scripts/verify.sh")],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(installed_verify.returncode, 0, installed_verify.stderr)
+            self.assertIn("CAPS installed layout verification passed.", installed_verify.stdout)
+
     def make_project(self, root: Path, local_docs: bytes = b"old docs\n") -> Path:
         project = root / "project"
         caps = project / ".caps"
@@ -133,7 +179,7 @@ class CapsUpdateTests(unittest.TestCase):
             self.assertIn("docs/example.md", result["local_overrides_preserved"])
             self.assertTrue((project / ".caps/scripts/example.py").exists())
             self.assertTrue(
-                (project / ".caps/tests/installed/test_installed_commands.py").exists()
+                (project / ".caps/scripts/installed-tests/test_installed_commands.py").exists()
             )
             installed = json.loads(
                 (project / ".caps/install-manifest.json").read_text(encoding="utf-8")

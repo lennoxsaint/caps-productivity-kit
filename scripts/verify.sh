@@ -5,7 +5,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 verify_installed_layout() {
   [[ -f "$root/install-manifest.json" ]] || { echo "Missing installed file: install-manifest.json" >&2; return 1; }
-  [[ -f "$root/config/installed-files.json" ]] || { echo "Missing installed file: config/installed-files.json" >&2; return 1; }
+  [[ -f "$root/scripts/install-contract.json" ]] || { echo "Missing installed file: scripts/install-contract.json" >&2; return 1; }
 
   bash -n "$root/scripts/verify.sh"
   python3 - "$root" <<'PY'
@@ -17,7 +17,7 @@ import sys
 
 root = pathlib.Path(sys.argv[1]).resolve()
 manifest_path = root / "install-manifest.json"
-contract_path = root / "config/installed-files.json"
+contract_path = root / "scripts/install-contract.json"
 try:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 except (OSError, json.JSONDecodeError) as error:
@@ -113,7 +113,7 @@ if failed:
 PY
 
   python3 "$root/scripts/verify-routing.py"
-  python3 -m unittest discover -s "$root/tests/installed" -v
+  python3 -m unittest discover -s "$root/scripts/installed-tests" -v
   echo "CAPS installed layout verification passed."
 }
 
@@ -185,8 +185,8 @@ required_files=(
   "scripts/caps-update.py"
   "scripts/pinned-thread-snapshot.py"
   "scripts/build-release.py"
-  "tests/installed/test_installed_commands.py"
-  "config/installed-files.json"
+  "scripts/installed-tests/test_installed_commands.py"
+  "scripts/install-contract.json"
   "config/title-preferences.json"
   "automations/pinned-title-sync/automation.toml"
   "automations/pinned-title-sync/prompt.md"
@@ -225,7 +225,7 @@ spec = importlib.util.spec_from_file_location("caps_update", root / "scripts/cap
 caps_update = importlib.util.module_from_spec(spec)
 assert spec.loader
 spec.loader.exec_module(caps_update)
-contract = json.loads((root / "config/installed-files.json").read_text(encoding="utf-8"))
+contract = json.loads((root / "scripts/install-contract.json").read_text(encoding="utf-8"))
 declared = contract.get("managed_files") if isinstance(contract, dict) else None
 if contract.get("schema_version") != "1.0" or not isinstance(declared, list):
     raise SystemExit("Invalid installed-file contract")

@@ -43,7 +43,7 @@ class InstallerTests(unittest.TestCase):
             self.assertIn("scripts/automation-doctor.py", manifest["managed_files"])
             self.assertIn("scripts/pinned-thread-snapshot.py", manifest["managed_files"])
             self.assertIn(
-                "tests/installed/test_installed_commands.py",
+                "scripts/installed-tests/test_installed_commands.py",
                 manifest["managed_files"],
             )
             self.assertNotIn("config/title-preferences.json", manifest["managed_files"])
