@@ -2,7 +2,10 @@
 
 Set up a practical Codex Agent Productivity System in your own projects.
 
-CAPS is a lightweight operating layer for using Codex as a project conductor with focused worker threads. It gives you repeatable instructions, naming conventions, handoff prompts, and installable templates so your agents stop acting like one-off chats and start acting like a coordinated system.
+CAPS is a lightweight operating layer for using Codex as a project conductor
+with focused workers. It gives you repeatable instructions, authority packets,
+naming conventions, handoff prompts, and installable templates so your agents
+stop acting like one-off chats and start acting like a coordinated system.
 
 This kit is intentionally plain. No SaaS. No dashboard. No magic. Clone it, run the installer, and adapt the templates to your workspace.
 
@@ -32,11 +35,15 @@ It is not:
 - A lane-factory `AGENTS.md` managed block
 - A Codex bootstrap prompt for creating and pinning `CAPS CONDUCTOR`
 - A conductor prompt for the main coordinating thread
+- A hybrid worker contract: native `subagent` by default, exceptional
+  `durable_thread` when persistence is justified
+- One-write-owner packets, capability validation, delegation limits, and
+  degraded-observability receipt rules
 - GPT-5.6 worker routing with explicit model, thinking, and authority envelopes
 - Redacted runtime routing receipts with conservative evidence evaluation
 - Lane-tree diagrams for brain-dump routing
 - Dynamic harness templates for complex, proof-sensitive work
-- Worker-thread prompts for implementation, research, QA, docs, and review lanes
+- Worker prompts for implementation, research, QA, docs, and review lanes
 - Naming and pinning conventions for keeping active work findable
 - Optional project/category emoji and evidence-gated pinned-title sync
 - Versioned stable updates with integrity checks, local-override preservation,
@@ -117,7 +124,11 @@ CAPS has three layers:
 1. `AGENTS.md` tells Codex how to behave in the workspace.
 2. The `CAPS CONDUCTOR` thread owns planning, routing, evidence, and final
    decisions.
-3. Worker threads handle bounded lanes such as implementation, QA, docs, research, or review.
+3. Workers handle bounded lanes such as implementation, QA, docs, research, or
+   review. Same-task work uses native subagents and is never titled or pinned.
+   Durable threads are reserved for an explicit user request, future follow-up,
+   separate history, host or worktree, ongoing incident, or release
+   coordination.
 
 Optional packs add a fourth layer: reusable setup material for a cohort, product, team, or launch shape. Packs can include lane templates, prompt schedules, skill manifests, and setup docs. They must stay public-safe: no secrets, no member data, no private thread IDs, and no proprietary launch proof unless that material has been explicitly cleared for publication.
 
@@ -129,7 +140,28 @@ copyable. SCDiagram or a native image jam can be used when the split needs a
 richer visual artifact. The tree is a review aid, not proof, and should keep
 private details generic.
 
-## Recommended Thread Pattern
+## Hybrid Worker Pattern
+
+The default worker kind is `subagent`. Use it for bounded reads, analysis,
+tests, or disjoint reversible local edits. A subagent receives a self-contained
+packet and stays inside its one write owner's file set.
+
+Use `durable_thread` only when persistence or separate coordination is actually
+needed: an explicit user request, future follow-up, separate history, host or
+worktree, ongoing incident, or release. Validate native thread controls before
+creating one; only then title and pin it. A title or pin is coordination
+metadata, never proof of completion.
+
+Start with no more than four workers. Scale to no more than ten only for
+independent, deterministic, non-colliding lanes. Workers cannot delegate by
+default; an explicit packet may permit nested delegation to depth two. Ultra is
+root-only. For mixed-model packets, `fork_turns: none` is the default and full
+history cannot silently override the requested model or authority.
+
+Read [`docs/hybrid-workers.md`](docs/hybrid-workers.md) and copy
+[`templates/worker-packet.md`](templates/worker-packet.md) before routing.
+
+## Recommended Durable Thread Pattern
 
 The first pinned thread is:
 
@@ -147,7 +179,8 @@ DOCS INSTALL GUIDE
 SHIP RELEASE 2026-05-30
 ```
 
-Pin only active threads. Archive stale threads when the decision or deliverable is captured.
+Pin only active durable threads. Subagents cannot be pinned. Archive stale
+durable threads when the decision or deliverable is captured.
 
 ## Repo Layout
 
@@ -168,12 +201,15 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 ├── templates/
 │   ├── AGENTS.caps-lane-factory.md
 │   ├── AGENTS.global.md
-│   └── AGENTS.repo.md
+│   ├── AGENTS.repo.md
+│   ├── authority-envelope.md
+│   └── worker-packet.md
 ├── prompts/
 │   ├── bootstrap-caps-conductor.md
 │   ├── conductor.md
 │   ├── adjacent-repo-router.md
 │   └── workers/
+│       ├── hybrid.md
 │       ├── docs.md
 │       ├── implementation.md
 │       ├── qa.md
@@ -181,6 +217,7 @@ Pin only active threads. Archive stale threads when the decision or deliverable 
 │       └── review.md
 ├── docs/
 │   ├── setup-guide.md
+│   ├── hybrid-workers.md
 │   ├── naming-and-pinning.md
 │   ├── updates.md
 │   ├── conductor-workflow.md
@@ -237,8 +274,10 @@ Packs live under `packs/<pack-name>/`. A pack can define:
 - `lanes/` for reusable conductor and worker lane templates
 
 Packs do not create, pin, or rename Codex threads from shell install. The
-Conductor may create, title, and pin pack-specific lanes later when the active
-Codex runtime exposes safe thread-control tools.
+Conductor may create, title, and pin pack-specific durable lanes later when the
+active Codex runtime exposes safe thread-control tools and the packet has a
+qualifying persistence reason. Pack work that stays in the same task uses an
+untitled, unpinned subagent.
 
 ## Verification
 

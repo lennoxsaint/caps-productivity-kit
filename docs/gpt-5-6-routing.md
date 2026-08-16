@@ -1,6 +1,6 @@
 # GPT-5.6 Routing
 
-CAPS routes real worker lanes for verified successful work per minute, including
+CAPS 0.4.0 routes worker work for verified successful work per minute, including
 retries and rework through the acceptance gate. Keep quick answers,
 clarifications, and tightly coupled work in the conductor. Create a worker only
 for an independent deliverable or proof lane.
@@ -21,6 +21,40 @@ gate. See the official [Luna](https://developers.openai.com/api/docs/models/gpt-
 [Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra), and
 [Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol) model pages.
 
+## Hybrid worker packet
+
+Every routed worker declares `worker_kind: subagent | durable_thread`. Use a
+native `subagent` for bounded same-task work; it is never titled or pinned. Use
+`durable_thread` only for an explicit user request, future follow-up, separate
+history, host or worktree, ongoing incident, or release coordination. Start
+with at most four workers and scale to at most ten only for independent,
+deterministic, non-colliding lanes.
+
+When the parent request authorizes local reversible work, the conductor may
+automatically delegate an independent subtask through `spawn_agent`, observe it
+with `list_agents`, coordinate it with `send_message` or `followup_task`, await
+it with `wait_agent`, and stop it with `interrupt_agent`. This automatic path
+does not require per-subagent approval. It never authorizes creation of a
+durable thread; `durable_thread` remains explicit-user-only.
+
+Every packet names one write owner and exact file set. Local reads, analysis,
+tests, and disjoint reversible edits may be allowed. External sends,
+production writes, merge, deploy, publish, credential changes, irreversible
+actions, and authority widening are prohibited by default. Workers cannot
+delegate by default; explicit nested delegation stops at depth two. Ultra is
+root-only.
+
+For mixed-model packets, `fork_turns: none` is the default. Use a bounded
+positive value only when the packet explains why inherited context is needed;
+both modes may specify an explicit model and thinking override. `fork_turns: all`
+inherits the parent model and thinking and cannot accept an override, so it
+is not a mixed-model route. No fork mode changes the packet's worker kind,
+authority, or file set.
+
+Validate model, thinking, worker kind, `fork_turns`, and (for durable threads)
+native title/pin controls before execution. Missing capabilities are reported;
+never silently substitute a route or proof state.
+
 ## Conductor-first task understanding
 
 Before selecting a worker route, the Brain Conductor creates the routing
@@ -36,6 +70,13 @@ Do not delegate until the snapshot is complete. A worker receives the snapshot,
 authority envelope, quality gate, and escalation route as one self-contained
 packet. This keeps cheap workers bounded and lets the conductor retain
 ambiguity, prioritization, and cross-lane judgment.
+
+The model capability snapshot is a separate live-runtime input. Export the
+current Codex runtime or App Server model catalog, including its provenance and
+capture time, then pass it through `scripts/capability-snapshot.py`. Validate
+every explicit model and reasoning level against its digest. Never promote a
+manual list, sanitized example, screenshot, or stale prior snapshot into live
+capability truth; refresh it when provenance or freshness cannot be established.
 
 ## Worker Matrix
 
@@ -83,12 +124,17 @@ Recalibrate after 30 real task receipts or 30 days, whichever comes first.
 
 ## Closed-loop calibration
 
-CAPS records redacted start/finish receipts in
+CAPS records redacted lifecycle receipts in
 `~/.codex/routing/receipts.jsonl` by default. A receipt contains route metadata,
 elapsed and rework time, pass/fail state, retry count, token/cost diagnostics
 when available, snapshot completeness, delegation quality, gate result,
 escalation reason, and short proof labels. It must not contain raw task text,
 answers, secrets, customer data, or private proof content.
+
+Start the receipt with the fresh capability-snapshot digest immediately before
+`spawn_agent`; bind the returned worker reference after the spawn succeeds;
+finish or abandon the same receipt after the quality gate. If spawning fails,
+close it as abandoned immediately. A pending receipt is not a completed run.
 
 Run `scripts/evaluate-routing-receipts.py` to produce recommendations. A
 task-class override requires at least 30 recent receipts, at least five samples
@@ -122,16 +168,20 @@ valid operational route.
 - `proof_required`: evidence required before it reports completion.
 - `stop_conditions`: conditions that require it to stop and report back.
 
-Pass the exact decision `model` and `thinking` values to `create_thread`, then
-title and pin the returned worker. Do not create a worker if the runtime cannot
-accept those values; use manual mode and say what was unavailable.
+Pass the exact decision `model` and `thinking` values to the requested worker
+kind. For a durable thread, pass them to `create_thread`, then title and pin
+only after native controls validate. Never title or pin a subagent. Do not
+create a worker if the runtime cannot accept the requested values; use manual
+mode and say what was unavailable.
 
 Reroute mid-task only for a material quality, time, or failure-risk gain. Record
 the replacement decision and why the gain is material.
 
-`create_thread` workers receive explicit model and thinking values. Inherited
-subagents may retain their parent's route. Do not describe these mechanisms as
-interchangeable or use inherited subagents for a mixed-model plan.
+Durable threads receive explicit model and thinking values. A native subagent
+with `fork_turns: none` or a bounded positive value may receive an explicit
+model and thinking override. A full-history fork inherits the parent's model
+and thinking and cannot receive an override. Do not describe these mechanisms
+as interchangeable or use `fork_turns: all` for a mixed-model packet.
 
 ## Manual Fallback
 

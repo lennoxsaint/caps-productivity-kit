@@ -2,6 +2,11 @@
 
 CAPS is useful only if work can be trusted after the thread closes.
 
+For hybrid work, include `worker_kind`, model, thinking, `fork_turns`, one write
+owner, exact file set, capability result, authority envelope, and delegation
+depth in the packet. A native subagent is never titled or pinned. A durable
+thread may be titled or pinned only after native capability validation.
+
 ## Evidence To Capture
 
 For code:
@@ -73,6 +78,11 @@ Reason: ...
 Verifier: passed | failed | skipped
 Proof target: draft | queued | scheduled | sent | published | merged | deployed | live-verified | blocked
 ```
+
+Receipts are redacted observability, not authority. If receipt creation,
+completion, or native readback fails, mark it `degraded`, report the exact gap,
+and preserve the normal acceptance and stop gates. Never convert a missing or
+partial receipt into proof of completion.
 
 ## Proof Rules
 

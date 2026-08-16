@@ -1,0 +1,22 @@
+{
+  "task_snapshot": {"objective": "Research one specialist question.", "scope": ["Approved sources only."], "acceptance_criteria": ["Claims cite sources."], "risk_level": "medium", "side_effects": "none", "evidence_refs": ["runtime-catalog"], "stop_conditions": ["Stop if the specialist is unavailable."]},
+  "task_class": "research_strategy",
+  "requested_model": "daybreak-research",
+  "requested_thinking": "high",
+  "resolved_model": "daybreak-research",
+  "resolved_thinking": "high",
+  "capability_snapshot_digest": "sha256:da865314924c88a6cfcda0ad760f0b72e46300b98f535baf741b79c1fb7f73dc",
+  "route_source": "selected",
+  "routing_mode": "direct",
+  "evidence_state": "runtime_observation",
+  "execution_level": "worker",
+  "worker_kind": "subagent",
+  "fork_turns": "none",
+  "delegation_depth": 1,
+  "nested_delegation": false,
+  "fanout": {"requested_workers": 1, "independent": true, "deterministic": true, "noncolliding": true},
+  "rationale": "This route must fail because Daybreak is not live or entitled in the supplied runtime snapshot.",
+  "quality_gate": "Every current claim cites an approved source.",
+  "escalate_when": ["The specialist capability changes."],
+  "authority": {"ceiling": "none", "allowed_actions": ["read", "analyze"], "prohibited_actions": ["external_send", "production_write", "merge", "deploy", "publish", "credential_change", "irreversible_action", "authority_widening"], "allowed": ["Read approved sources."], "prohibited": ["Send, publish, or purchase."], "proof_required": ["Return citations."], "stop_conditions": ["Stop if the specialist is unavailable."]}
+}

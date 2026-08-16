@@ -60,6 +60,8 @@ class InstalledCommandTests(unittest.TestCase):
                     "--task-snapshot-complete",
                     "--profile-version",
                     "installed-test",
+                    "--capability-snapshot-digest",
+                    "sha256:" + "a" * 64,
                 ],
                 check=False,
                 capture_output=True,
@@ -67,6 +69,23 @@ class InstalledCommandTests(unittest.TestCase):
             )
             self.assertEqual(started.returncode, 0, started.stderr)
             receipt_id = started.stdout.strip()
+            bound = subprocess.run(
+                [
+                    "python3",
+                    str(ROOT / "scripts/routing-receipt.py"),
+                    "--store",
+                    str(store),
+                    "bind",
+                    "--receipt-id",
+                    receipt_id,
+                    "--worker-ref",
+                    "installed-test-worker",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(bound.returncode, 0, bound.stderr)
             finished = subprocess.run(
                 [
                     "python3",
@@ -80,6 +99,7 @@ class InstalledCommandTests(unittest.TestCase):
                     "pass",
                     "--delegation-quality",
                     "complete",
+                    "--capability-verified",
                     "--proof-ref",
                     "installed-tests",
                 ],

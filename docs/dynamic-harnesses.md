@@ -14,6 +14,14 @@ Use a harness to decide:
 Do not use a harness for simple commands, one-file edits, or obvious direct
 execution. Coordination has a cost.
 
+Harness fan-out follows the hybrid worker contract. Start with at most four
+workers and scale to at most ten only for independent, deterministic,
+non-colliding roles with separate write owners and file sets. Same-task roles
+are native subagents and are never titled or pinned. Durable threads require a
+qualifying persistence reason and validated native controls. Workers cannot
+delegate unless the packet explicitly allows it, with nested depth capped at
+two.
+
 ## When To Use One
 
 Use a harness when at least two are true:

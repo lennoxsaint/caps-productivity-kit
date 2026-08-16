@@ -3,6 +3,13 @@
 CAPS is distributed as a public Git repository and copied into a project by
 `install.sh`. It is not a package-manager install or a hosted service.
 
+In 0.4.0, pinned-title sync and stable updater automations remain paused
+rollout proposals. A copied template is not an active automation. Activation
+requires native schedule/thread controls plus readback of the saved model,
+reasoning effort, target, prompt path, status, and scope. Missing controls or
+readback are degraded observability; leave the proposal paused and report the
+exact blocker. Never use local Codex state files as a substitute.
+
 ## Update channel
 
 Installed projects track the explicit `stable` channel. A channel manifest
