@@ -98,6 +98,16 @@ Events complement the sweep; they do not replace it.
 The policy engine:
 
 - inspects active pinned threads only;
+- discovers the single case-insensitive `Pinned` section through native
+  `threadSection/list`, then uses `thread/list` with its `sectionId`;
+- falls back to the legacy `isPinned=true`/`useStateDbOnly=true` query only when
+  the section method returns legacy JSON-RPC `-32600` or method-not-found
+  `-32601`;
+- fails closed on missing, ambiguous, or empty-unverified sections and
+  mismatched row membership; an empty section cannot prove that legacy pin
+  metadata was migrated;
+- fails closed when the installed Codex app-server omits pin metadata or ignores
+  the pin filter; it never substitutes an unfiltered history scan;
 - requires a new task-state revision and evidence references;
 - preserves owner wording and manual overrides;
 - rejects unverified completion language;

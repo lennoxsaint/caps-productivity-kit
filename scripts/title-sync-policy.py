@@ -186,9 +186,13 @@ def evaluate_thread(
         strip_known_emoji(proposed, configured_emojis(config, thread_state)),
         max(8, body_limit),
     )
-    desired = f"{emoji} {body}".strip()
-    if desired == current_title:
+    current_body = normalize_action_title(
+        strip_known_emoji(current_title, configured_emojis(config, thread_state)),
+        max(8, body_limit),
+    )
+    if current_body == body:
         return skip(thread_id, "title_already_current")
+    desired = f"{emoji} {body}".strip()
     fingerprint_source = "\0".join((thread_id, desired, state_revision))
     fingerprint = hashlib.sha256(fingerprint_source.encode("utf-8")).hexdigest()
     if fingerprint == thread_state.get("last_fingerprint"):
@@ -249,6 +253,8 @@ def record_result(
         thread_state.pop("manual_title_override", None)
         thread_state.pop("manual_emoji_override", None)
         thread_state["last_applied_title"] = str(result.get("current_title") or "")
+    if outcome == "unchanged" and result.get("state_revision"):
+        thread_state["last_state_revision"] = str(result["state_revision"])
     thread_state["last_outcome"] = outcome
     thread_state["last_observed_at"] = observed_at.isoformat()
     return state

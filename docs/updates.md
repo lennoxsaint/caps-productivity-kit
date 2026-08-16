@@ -29,6 +29,24 @@ and hashes of managed files. It keeps user-owned state separate:
 - `.caps/state/` contains local runtime state and audit records;
 - non-managed files and non-managed `AGENTS.md` content remain user-owned.
 
+Verify either checkout layout with the verifier shipped in that layout:
+
+```bash
+# From the CAPS source repository
+./scripts/verify.sh
+
+# From a project with CAPS installed
+.caps/scripts/verify.sh
+```
+
+The source-repository check keeps the complete release, pack, private-material,
+artifact, routing, and test gates. The installed check auto-detects
+`.caps/install-manifest.json` and checks only the mapped installed layout. It
+verifies required installed files, managed-file SHA-256 hashes, declared local
+overrides, routing schemas and examples, and the curated installed test suite.
+It does not require source-only files such as `README.md`, `AGENTS.md`,
+`install.sh`, release channels, or source packs.
+
 ## Check, apply, and rollback
 
 ```bash

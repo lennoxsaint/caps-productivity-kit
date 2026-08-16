@@ -88,6 +88,7 @@ copy_dir "$script_dir/schemas" "$caps_dir/schemas"
 copy_dir "$script_dir/examples" "$caps_dir/examples"
 copy_dir "$script_dir/scripts" "$caps_dir/scripts"
 copy_dir "$script_dir/automations" "$caps_dir/automations"
+copy_dir "$script_dir/tests/installed" "$caps_dir/tests/installed"
 mkdir -p "$caps_dir/defaults" "$caps_dir/config"
 cp "$script_dir/config/title-preferences.json" "$caps_dir/defaults/title-preferences.json"
 if [[ ! -f "$caps_dir/config/title-preferences.json" ]]; then
@@ -122,6 +123,7 @@ source_mappings = {
     "schemas": "schemas",
     "scripts": "scripts",
     "templates": "templates",
+    "tests/installed": "tests/installed",
     "VERSION": "VERSION",
     "config/title-preferences.json": "defaults/title-preferences.json",
     "prompts/bootstrap-caps-conductor.md": "bootstrap/start-caps-conductor.md",
