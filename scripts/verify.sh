@@ -46,6 +46,13 @@ if not isinstance(contract_files, list) or any(not isinstance(item, str) for ite
 required_managed = set(contract_files)
 if len(required_managed) != len(contract_files):
     raise SystemExit("Duplicate installed-file contract entry")
+required_unmanaged = contract.get("required_unmanaged_files")
+if not isinstance(required_unmanaged, list) or any(not isinstance(item, str) for item in required_unmanaged):
+    raise SystemExit("Invalid installed-file contract required_unmanaged_files")
+for relative in required_unmanaged:
+    if not (root / pathlib.PurePosixPath(relative)).is_file():
+        print(f"Missing required unmanaged file: {relative}", file=sys.stderr)
+        raise SystemExit(1)
 for relative in sorted(required_managed - managed.keys()):
     print(f"Required installed file is not managed: {relative}", file=sys.stderr)
 if required_managed - managed.keys():

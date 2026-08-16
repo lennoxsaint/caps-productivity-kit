@@ -116,6 +116,19 @@ class InstalledVerifierTests(unittest.TestCase):
                 result.stderr,
             )
 
+    def test_installed_layout_requires_user_owned_title_preferences(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            project = self.install_project(Path(temporary))
+            (project / ".caps/config/title-preferences.json").unlink()
+
+            result = self.run_installed_verifier(project)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(
+                "Missing required unmanaged file: config/title-preferences.json",
+                result.stderr,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

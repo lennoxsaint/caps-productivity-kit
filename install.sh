@@ -116,20 +116,10 @@ from datetime import datetime, timezone
 
 caps = pathlib.Path(sys.argv[1])
 source_root = pathlib.Path(sys.argv[2])
-source_mappings = {
-    "automations": "automations",
-    "docs": "docs",
-    "examples": "examples",
-    "prompts": "prompts",
-    "schemas": "schemas",
-    "scripts": "scripts",
-    "templates": "templates",
-    "tests/installed": "tests/installed",
-    "VERSION": "VERSION",
-    "config/installed-files.json": "config/installed-files.json",
-    "config/title-preferences.json": "defaults/title-preferences.json",
-    "prompts/bootstrap-caps-conductor.md": "bootstrap/start-caps-conductor.md",
-}
+contract = json.loads((source_root / "config/installed-files.json").read_text(encoding="utf-8"))
+source_mappings = contract.get("source_mappings")
+if not isinstance(source_mappings, dict):
+    raise SystemExit("Invalid installed-file contract source_mappings")
 managed = {}
 for source_name, target_name in source_mappings.items():
     source = source_root / source_name

@@ -1,5 +1,22 @@
 {
   "schema_version": "1.0",
+  "source_mappings": {
+    "automations": "automations",
+    "config/installed-files.json": "config/installed-files.json",
+    "config/title-preferences.json": "defaults/title-preferences.json",
+    "docs": "docs",
+    "examples": "examples",
+    "prompts": "prompts",
+    "prompts/bootstrap-caps-conductor.md": "bootstrap/start-caps-conductor.md",
+    "schemas": "schemas",
+    "scripts": "scripts",
+    "templates": "templates",
+    "tests/installed": "tests/installed",
+    "VERSION": "VERSION"
+  },
+  "required_unmanaged_files": [
+    "config/title-preferences.json"
+  ],
   "managed_files": [
     "VERSION",
     "automations/caps-update/automation.toml",

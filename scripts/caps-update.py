@@ -23,20 +23,18 @@ DEFAULT_CHANNEL_URL = (
     "caps-productivity-kit/main/channels/stable.json"
 )
 INSTALL_SCHEMA = "1.0"
-SOURCE_MAPPINGS = {
-    "automations": "automations",
-    "docs": "docs",
-    "examples": "examples",
-    "prompts": "prompts",
-    "schemas": "schemas",
-    "scripts": "scripts",
-    "templates": "templates",
-    "tests/installed": "tests/installed",
-    "VERSION": "VERSION",
-    "config/installed-files.json": "config/installed-files.json",
-    "config/title-preferences.json": "defaults/title-preferences.json",
-    "prompts/bootstrap-caps-conductor.md": "bootstrap/start-caps-conductor.md",
-}
+INSTALL_CONTRACT_PATH = Path(__file__).resolve().parents[1] / "config/installed-files.json"
+
+
+def source_mappings() -> dict[str, str]:
+    contract = read_json(INSTALL_CONTRACT_PATH)
+    mappings = contract.get("source_mappings")
+    if not isinstance(mappings, dict) or any(
+        not isinstance(source, str) or not isinstance(target, str)
+        for source, target in mappings.items()
+    ):
+        raise RuntimeError("invalid_install_contract_source_mappings")
+    return mappings
 
 
 def version_tuple(value: str) -> tuple[int, ...]:
@@ -145,7 +143,7 @@ def safe_extract(archive: Path, destination: Path) -> Path:
 
 def release_managed_files(release_root: Path) -> dict[str, Path]:
     files: dict[str, Path] = {}
-    for source_name, target_name in SOURCE_MAPPINGS.items():
+    for source_name, target_name in source_mappings().items():
         source = release_root / source_name
         if not source.exists():
             raise RuntimeError(f"release_missing_required_path:{source_name}")
