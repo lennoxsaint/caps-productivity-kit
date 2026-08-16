@@ -96,15 +96,7 @@ class CapsUpdateTests(unittest.TestCase):
     def test_v032_updater_produces_a_verifiable_v033_install(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            previous_source = subprocess.run(
-                ["git", "show", "v0.3.2:scripts/caps-update.py"],
-                cwd=ROOT,
-                check=True,
-                capture_output=True,
-                text=True,
-            ).stdout
-            previous_path = root / "caps-update-0.3.2.py"
-            previous_path.write_text(previous_source, encoding="utf-8")
+            previous_path = ROOT / "tests/fixtures/caps-update-0.3.2.py"
             previous_spec = importlib.util.spec_from_file_location("caps_update_032", previous_path)
             previous = importlib.util.module_from_spec(previous_spec)
             assert previous_spec.loader
