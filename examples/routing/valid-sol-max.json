@@ -1,12 +1,21 @@
 {
   "task_snapshot": {
     "objective": "Resolve the indivisible high-value decision.",
-    "scope": ["Read approved evidence.", "Produce one decision memo."],
-    "acceptance_criteria": ["Every stated tradeoff is resolved with cited evidence."],
+    "scope": [
+      "Read approved evidence.",
+      "Produce one decision memo."
+    ],
+    "acceptance_criteria": [
+      "Every stated tradeoff is resolved with cited evidence."
+    ],
     "risk_level": "high",
     "side_effects": "none",
-    "evidence_refs": ["approved-primary-sources"],
-    "stop_conditions": ["Stop if required owner intent is missing."]
+    "evidence_refs": [
+      "approved-primary-sources"
+    ],
+    "stop_conditions": [
+      "Stop if required owner intent is missing."
+    ]
   },
   "task_class": "research_strategy",
   "requested_model": "gpt-5.6-sol",
@@ -15,7 +24,7 @@
   "resolved_thinking": "max",
   "model": "gpt-5.6-sol",
   "thinking": "max",
-  "capability_snapshot_digest": "sha256:da865314924c88a6cfcda0ad760f0b72e46300b98f535baf741b79c1fb7f73dc",
+  "capability_snapshot_digest": "sha256:3af9d5ca430f2ee8d82951d6382a87c13640154e0eec387cdc1b456e19c0c9ff",
   "route_source": "selected",
   "routing_mode": "direct",
   "evidence_state": "official_guidance",
@@ -24,17 +33,46 @@
   "fork_turns": "none",
   "delegation_depth": 0,
   "nested_delegation": false,
-  "fanout": {"requested_workers": 0, "independent": false, "deterministic": false, "noncolliding": false},
+  "fanout": {
+    "requested_workers": 0,
+    "independent": false,
+    "deterministic": false,
+    "noncolliding": false,
+    "active_workers": 0
+  },
   "rationale": "The decision is unusually difficult, high value, and cannot be decomposed safely.",
   "quality_gate": "The recommendation resolves every stated tradeoff with cited evidence.",
-  "escalate_when": ["A required primary source is inaccessible."],
+  "escalate_when": [
+    "A required primary source is inaccessible."
+  ],
   "authority": {
     "ceiling": "none",
-    "allowed_actions": ["read", "analyze", "durable_thread_control"],
-    "prohibited_actions": ["external_send", "production_write", "merge", "deploy", "publish", "credential_change", "irreversible_action", "authority_widening"],
-    "allowed": ["Read approved sources and produce a decision memo."],
-    "prohibited": ["Purchase, publish, or send anything."],
-    "proof_required": ["Cite every material current claim."],
-    "stop_conditions": ["Stop if the decision depends on missing owner intent."]
+    "allowed_actions": [
+      "read",
+      "analyze",
+      "durable_thread_control"
+    ],
+    "prohibited_actions": [
+      "external_send",
+      "production_write",
+      "merge",
+      "deploy",
+      "publish",
+      "credential_change",
+      "irreversible_action",
+      "authority_widening"
+    ],
+    "allowed": [
+      "Read approved sources and produce a decision memo."
+    ],
+    "prohibited": [
+      "Purchase, publish, or send anything."
+    ],
+    "proof_required": [
+      "Cite every material current claim."
+    ],
+    "stop_conditions": [
+      "Stop if the decision depends on missing owner intent."
+    ]
   }
 }

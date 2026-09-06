@@ -45,9 +45,9 @@ Use this order when instructions conflict:
 - Allow local reads, analysis, tests, and declared disjoint reversible edits.
   Prohibit external sends, production writes, merge, deploy, publish,
   credentials, irreversible actions, and authority widening by default.
-- Start with at most four workers; scale to ten only for independent,
+- Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
   deterministic, non-colliding lanes. Workers cannot delegate by default;
-  explicit nested delegation stops at depth two. Ultra is root-only.
+  owner-requested nested delegation stops at depth two. Ultra is root-only.
 - Build capability truth from a fresh, provenance-bearing live runtime catalog
   with `scripts/capability-snapshot.py`; never use a manual or stale list.
 - `fork_turns: none` or a bounded positive value may use an explicit model and

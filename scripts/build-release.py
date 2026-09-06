@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED_PARTS = {".git", "channels", "dist", "__pycache__"}
 MINIMUM_UPDATER_VERSION = "0.3.3"
-ROLLBACK_VERSION = "0.3.3"
+ROLLBACK_VERSION = "0.4.0"
 
 
 def release_files(root: Path) -> list[Path]:

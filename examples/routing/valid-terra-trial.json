@@ -8,7 +8,7 @@
     "acceptance_criteria": [
       "Targeted and project verification pass."
     ],
-    "risk_level": "medium",
+    "risk_level": "low",
     "side_effects": "local_reversible",
     "evidence_refs": [
       "routing-receipts/bounded-tool-work.json"
@@ -26,8 +26,8 @@
   "thinking": "high",
   "capability_snapshot_digest": "sha256:3af9d5ca430f2ee8d82951d6382a87c13640154e0eec387cdc1b456e19c0c9ff",
   "route_source": "selected",
-  "routing_mode": "direct",
-  "evidence_state": "personal_eval",
+  "routing_mode": "probe_then_escalate",
+  "evidence_state": "official_guidance",
   "execution_level": "worker",
   "worker_kind": "subagent",
   "fork_turns": "none",
@@ -45,15 +45,6 @@
   "escalate_when": [
     "The requested API contract must change."
   ],
-  "calibration": {
-    "receipt": "routing-receipts/bounded-tool-work.json",
-    "compared_models": [
-      "gpt-5.6-luna",
-      "gpt-5.6-sol"
-    ],
-    "runs_per_candidate": 3,
-    "metric": "verified_completions_per_minute"
-  },
   "authority": {
     "ceiling": "local_reversible",
     "allowed_actions": [
@@ -84,5 +75,13 @@
     "stop_conditions": [
       "Stop after two failed attempts with the same symptom."
     ]
+  },
+  "trial": {
+    "deterministic_verification": true,
+    "safe_retry": true
+  },
+  "escalation_route": {
+    "model": "gpt-5.6-sol",
+    "thinking": "medium"
   }
 }

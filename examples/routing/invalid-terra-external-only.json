@@ -1,12 +1,20 @@
 {
   "task_snapshot": {
     "objective": "Exercise unsupported Terra evidence.",
-    "scope": ["Validate one fixture."],
-    "acceptance_criteria": ["The fixture is rejected."],
+    "scope": [
+      "Validate one fixture."
+    ],
+    "acceptance_criteria": [
+      "The fixture is rejected."
+    ],
     "risk_level": "low",
     "side_effects": "none",
-    "evidence_refs": ["external-benchmark"],
-    "stop_conditions": ["Stop after validation."]
+    "evidence_refs": [
+      "external-benchmark"
+    ],
+    "stop_conditions": [
+      "Stop after validation."
+    ]
   },
   "task_class": "coding",
   "model": "gpt-5.6-terra",
@@ -16,11 +24,22 @@
   "execution_level": "worker",
   "rationale": "An aggregate chart alone is insufficient evidence for Terra.",
   "quality_gate": "Targeted tests pass.",
-  "escalate_when": ["The quality gate fails."],
+  "escalate_when": [
+    "The quality gate fails."
+  ],
   "authority": {
-    "allowed": ["Run the bounded fixture."],
-    "prohibited": ["Expand scope."],
-    "proof_required": ["Return test results."],
-    "stop_conditions": ["Stop on a severe error."]
-  }
+    "allowed": [
+      "Run the bounded fixture."
+    ],
+    "prohibited": [
+      "Expand scope."
+    ],
+    "proof_required": [
+      "Return test results."
+    ],
+    "stop_conditions": [
+      "Stop on a severe error."
+    ]
+  },
+  "capability_snapshot_digest": "sha256:3af9d5ca430f2ee8d82951d6382a87c13640154e0eec387cdc1b456e19c0c9ff"
 }

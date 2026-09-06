@@ -39,7 +39,7 @@ It is not:
   `durable_thread` when persistence is justified
 - One-write-owner packets, capability validation, delegation limits, and
   degraded-observability receipt rules
-- GPT-5.6 worker routing with explicit model, thinking, and authority envelopes
+- Astra, Sol, Terra, and Luna worker routing with explicit model, thinking, and authority envelopes
 - Redacted runtime routing receipts with conservative evidence evaluation
 - Lane-tree diagrams for brain-dump routing
 - Dynamic harness templates for complex, proof-sensitive work
@@ -152,7 +152,7 @@ worktree, ongoing incident, or release. Validate native thread controls before
 creating one; only then title and pin it. A title or pin is coordination
 metadata, never proof of completion.
 
-Start with no more than four workers. Scale to no more than ten only for
+Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for
 independent, deterministic, non-colliding lanes. Workers cannot delegate by
 default; an explicit packet may permit nested delegation to depth two. Ultra is
 root-only. For mixed-model packets, `fork_turns: none` is the default and full
@@ -294,3 +294,21 @@ matrix without third-party dependencies.
 ## License
 
 MIT. Use it, remix it, ship with it.
+
+## 0.5 routing upgrade
+
+Astra handles demanding end-to-end work while Sol, Terra, and Luna remain
+available for suitable bounded tasks. Main-model selection stays owner-controlled.
+Automatic delegation defaults to three concurrent workers across the root task.
+Larger teams and nesting require an explicit owner request. Terra may collect
+evidence through safe bounded trials before default-route promotion.
+
+Upgrading retains the existing routing-doc path and receipt schema. Old receipts
+remain readable; their original eligibility checks still apply. The decision
+schema adds optional trial and delegation-request fields and requires explicit
+active-worker counts for new decisions. New spawns follow the new cap; legacy receipts are never rewritten.
+
+Experimental context management is a separate opt-in, never enabled by the
+public installer. Check client/account support and workspace requirements, then
+back up config and verify a new task before claiming activation. See the
+[official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference).

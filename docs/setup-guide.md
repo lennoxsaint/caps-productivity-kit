@@ -95,9 +95,9 @@ from `.caps/prompts/workers/` plus a narrow assignment. Each packet names one
 write owner and exact file set. Validate model, thinking, worker kind, and
 `fork_turns` before execution; never silently substitute a capability.
 
-Start with at most four workers. Scale to at most ten only for independent,
+Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
 deterministic, non-colliding lanes. Workers cannot delegate by default;
-explicit nested delegation stops at depth two, and Ultra is root-only.
+owner-requested nested delegation stops at depth two, and Ultra is root-only.
 
 When native thread-control tools are available, `CAPS CONDUCTOR` can create,
 title, and pin only a validated durable thread after the user explicitly asks

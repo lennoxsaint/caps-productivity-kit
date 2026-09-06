@@ -1,12 +1,18 @@
 {
   "task_snapshot": {
     "objective": "Exercise an invalid nested Ultra route.",
-    "scope": ["Validate one fixture."],
-    "acceptance_criteria": ["The fixture is rejected."],
+    "scope": [
+      "Validate one fixture."
+    ],
+    "acceptance_criteria": [
+      "The fixture is rejected."
+    ],
     "risk_level": "low",
     "side_effects": "none",
     "evidence_refs": [],
-    "stop_conditions": ["Stop after validation."]
+    "stop_conditions": [
+      "Stop after validation."
+    ]
   },
   "task_class": "proof_review",
   "model": "gpt-5.6-sol",
@@ -16,11 +22,22 @@
   "execution_level": "worker",
   "rationale": "Ultra cannot be nested inside a worker.",
   "quality_gate": "Every lane returns proof.",
-  "escalate_when": ["Lanes share mutable state."],
+  "escalate_when": [
+    "Lanes share mutable state."
+  ],
   "authority": {
-    "allowed": ["Read supplied evidence."],
-    "prohibited": ["Spawn nested Ultra work."],
-    "proof_required": ["Return source references."],
-    "stop_conditions": ["Stop if work cannot split safely."]
-  }
+    "allowed": [
+      "Read supplied evidence."
+    ],
+    "prohibited": [
+      "Spawn nested Ultra work."
+    ],
+    "proof_required": [
+      "Return source references."
+    ],
+    "stop_conditions": [
+      "Stop if work cannot split safely."
+    ]
+  },
+  "capability_snapshot_digest": "sha256:3af9d5ca430f2ee8d82951d6382a87c13640154e0eec387cdc1b456e19c0c9ff"
 }

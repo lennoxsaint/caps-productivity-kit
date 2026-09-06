@@ -16,15 +16,17 @@ This workspace uses CAPS, the Codex Agent Productivity System.
   or pinned.
 - Route work to an existing durable lane before creating a duplicate durable
   lane. Keep quick answers and tightly coupled work in the conductor.
-- Start with at most four workers. Scale to at most ten only when lanes are
+- Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten when lanes are
   independent, deterministic, and non-colliding with separate write owners.
+  Count all active descendants against the root cap before every spawn.
 - Before every worker, create a routing decision using
   `.caps/docs/gpt-5-6-routing.md` and `.caps/schemas/routing-decision.schema.json`.
   Complete its redacted task snapshot before routing, then include the snapshot
   and authority envelope in the worker prompt.
 - Optimize verified successful work per minute, including retries and rework.
-  Luna is the safe-retry starting route; Terra requires repeated personal-eval
-  or runtime evidence; Sol owns ambiguity and costly failure.
+  Astra handles demanding end-to-end work, Sol complex bounded work, and Luna
+  clear repeatable work. Trial Terra only with deterministic checks and safe
+  retry; default-route promotion requires real comparative evidence.
 - Validate worker kind, model, thinking, `fork_turns`, and (for durable
   threads) native title/pin controls before execution. Never silently
   substitute a capability. For a mixed-model packet, `fork_turns` is `none`
@@ -36,16 +38,16 @@ This workspace uses CAPS, the Codex Agent Productivity System.
   capture time. Manual lists, examples, screenshots, and stale snapshots are
   not live capability truth.
 - When a validated durable thread is created, pass the routing decision's
-  exact GPT-5.6 `model` and `thinking` values to `create_thread`, then title
+  exact resolved `model` and `thinking` values to `create_thread`, then title
   and pin it. Subagents never call title or pin controls.
 - Reroute only for a material quality, time, or failure-risk gain. Manual work
-  defaults to `gpt-5.6-sol` / `medium`; suggest a switch only for a material
-  mismatch, and stop only when severe.
-- Ultra is root-only. Workers cannot delegate by default. An explicit packet
+  preserves the user-selected main model and reasoning effort; worker routing
+  never overwrites either setting.
+- Ultra is root-only. Workers cannot delegate by default. An explicit owner request recorded in the packet
   may allow nested delegation to depth two, but Ultra may not be assigned below
   the root. Do not confuse inherited subagents with durable threads.
 - Non-OpenAI planner, reviewer, or council use is advisory-only and requires a
-  written reason; it cannot replace the executing GPT-5.6 worker.
+  written reason; it cannot replace the executing worker.
 - Use short uppercase action-first titles, capped at 48 characters without
   cutting mid-word, only for durable threads.
 - Treat titles and emoji as coordination metadata, not completion proof.

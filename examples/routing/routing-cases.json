@@ -1,9 +1,47 @@
 [
-  {"name": "mechanical extraction", "model": "gpt-5.6-luna", "thinking": "low"},
-  {"name": "frozen plan implementation", "model": "gpt-5.6-luna", "thinking": "high"},
-  {"name": "integration-sensitive implementation", "model": "gpt-5.6-sol", "thinking": "medium"},
-  {"name": "evidence-gated middle route", "model": "gpt-5.6-terra", "thinking": "high"},
-  {"name": "ambiguous architecture", "model": "gpt-5.6-sol", "thinking": "high"},
-  {"name": "indivisible hardest problem", "model": "gpt-5.6-sol", "thinking": "max"},
-  {"name": "independent high value lanes", "model": "gpt-5.6-sol", "thinking": "ultra"}
+  {
+    "name": "mechanical extraction",
+    "model": "gpt-5.6-luna",
+    "thinking": "low"
+  },
+  {
+    "name": "frozen plan implementation",
+    "model": "gpt-5.6-luna",
+    "thinking": "high"
+  },
+  {
+    "name": "integration-sensitive implementation",
+    "model": "gpt-5.6-sol",
+    "thinking": "medium"
+  },
+  {
+    "name": "evidence-gated middle route",
+    "model": "gpt-5.6-terra",
+    "thinking": "high"
+  },
+  {
+    "name": "ambiguous architecture",
+    "model": "gpt-5.6-sol",
+    "thinking": "high"
+  },
+  {
+    "name": "indivisible hardest problem",
+    "model": "gpt-5.6-sol",
+    "thinking": "max"
+  },
+  {
+    "name": "independent high value lanes",
+    "model": "gpt-5.6-sol",
+    "thinking": "ultra"
+  },
+  {
+    "name": "demanding end-to-end workflow",
+    "model": "gpt-6-astra",
+    "thinking": "high"
+  },
+  {
+    "name": "rare indivisible Astra task",
+    "model": "gpt-6-astra",
+    "thinking": "max"
+  }
 ]

@@ -184,6 +184,11 @@ def validate(
         errors.append("nested_delegation must be explicitly true or false")
     if depth == 2 and decision.get("nested_delegation"):
         errors.append("nested delegation cannot be enabled at depth 2")
+    request_ref = decision.get("delegation_request_ref")
+    if request_ref is not None and (not isinstance(request_ref, str) or not request_ref.strip()):
+        errors.append("delegation_request_ref must identify an explicit owner request")
+    if (depth == 2 or decision.get("nested_delegation")) and not request_ref:
+        errors.append("nested delegation requires an explicit owner request")
     if decision.get("resolved_thinking") == "ultra" and (
         decision.get("execution_level") != "root" or depth != 0
     ):
@@ -215,18 +220,27 @@ def validate(
     if not isinstance(fanout, dict):
         errors.append("fanout must be an object")
     else:
-        expected_fields = {"requested_workers", "independent", "deterministic", "noncolliding"}
+        expected_fields = {"requested_workers", "active_workers", "independent", "deterministic", "noncolliding"}
         if fanout.keys() != expected_fields:
             errors.append(f"fanout must contain exactly: {sorted(expected_fields)}")
         requested_workers = fanout.get("requested_workers")
+        active_workers = fanout.get("active_workers", 0)
+        if not isinstance(active_workers, int) or isinstance(active_workers, bool) or active_workers < 0:
+            errors.append("fanout.active_workers must be a non-negative integer")
+            active_workers = 0
         if not isinstance(requested_workers, int) or isinstance(requested_workers, bool) or requested_workers < 0:
             errors.append("fanout.requested_workers must be a non-negative integer")
         elif requested_workers > 10:
             errors.append("fanout cannot exceed 10")
-        elif requested_workers > 4 and not all(
-            fanout.get(field) is True for field in ("independent", "deterministic", "noncolliding")
-        ):
-            errors.append("fanout above 4 requires independent, deterministic, noncolliding lanes")
+        else:
+            if requested_workers + active_workers > 10:
+                errors.append("total concurrent workers cannot exceed 10")
+            if requested_workers + active_workers > 3 and not request_ref:
+                errors.append("more than three concurrent workers requires an explicit owner request")
+            if requested_workers > 0 and not all(fanout.get(field) is True for field in ("independent", "noncolliding")):
+                errors.append("workers require independent, noncolliding lanes")
+            if requested_workers + active_workers > 3 and fanout.get("deterministic") is not True:
+                errors.append("expanded teams require deterministic lanes")
         for field in ("independent", "deterministic", "noncolliding"):
             if not isinstance(fanout.get(field), bool):
                 errors.append(f"fanout.{field} must be boolean")
@@ -240,10 +254,26 @@ def validate(
         escalation = decision.get("escalation_route")
         if not isinstance(escalation, dict):
             errors.append("probe_then_escalate requires escalation_route")
-        elif supported_route(capabilities or {}, escalation.get("model"), escalation.get("thinking")) is None:
-            errors.append("escalation_route is not supported by the capability snapshot")
+        else:
+            route = supported_route(capabilities or {}, escalation.get("model"), escalation.get("thinking"))
+            if route is None or not all(route.get(field) is True for field in ("live", "entitled", "allowed_by_policy")):
+                errors.append("escalation_route must be supported, live, entitled, and allowed by policy")
+            if escalation.get("thinking") == "ultra" and decision.get("execution_level") == "worker":
+                errors.append("worker escalation cannot use ultra")
+            if route and route.get("specialist_task_classes") and decision.get("task_class") not in route["specialist_task_classes"]:
+                errors.append("escalation specialist must support the task class")
+            if (escalation.get("model"), escalation.get("thinking")) == (decision.get("resolved_model"), decision.get("resolved_thinking")):
+                errors.append("escalation must differ from the attempted route")
 
-    if decision.get("resolved_model") == "gpt-5.6-terra":
+    trial = decision.get("trial")
+    if trial is not None:
+        if not isinstance(trial, dict) or trial != {"deterministic_verification": True, "safe_retry": True}:
+            errors.append("trial requires deterministic verification and safe retry")
+        if decision.get("task_class") not in {"coding", "transformation", "proof_review"} or task_snapshot.get("risk_level") == "high" or task_snapshot.get("side_effects") not in {"none", "local_reversible"}:
+            errors.append("trial must be bounded, non-high-risk, and locally reversible")
+        if decision.get("routing_mode") != "probe_then_escalate":
+            errors.append("trial requires a verified escalation route")
+    if decision.get("resolved_model") == "gpt-5.6-terra" and trial is None:
         calibration = decision.get("calibration")
         if decision.get("evidence_state") not in {"personal_eval", "runtime_observation"}:
             errors.append("terra requires personalized or runtime evidence")

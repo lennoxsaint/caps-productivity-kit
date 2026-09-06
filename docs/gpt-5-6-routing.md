@@ -1,25 +1,20 @@
-# GPT-5.6 Routing
+# Astra and Mixed-Model Routing
 
-CAPS 0.4.0 routes worker work for verified successful work per minute, including
+CAPS 0.5.0 routes worker work for verified successful work per minute, including
 retries and rework through the acceptance gate. Keep quick answers,
 clarifications, and tightly coupled work in the conductor. Create a worker only
 for an independent deliverable or proof lane.
 
-Evidence basis: OpenAI positions Sol for complex work, Terra for everyday
-reasoning/tool use, and Luna for clear repeatable work. Artificial Analysis finds
-Terra dominated on its aggregate intelligence-per-dollar index, but task-specific
-coding results do not establish universal dominance. CAPS therefore requires
-local comparative evidence before selecting Terra. See the
-[OpenAI model guide](https://learn.chatgpt.com/docs/models?surface=app),
-[OpenAI GPT-5.6 results](https://openai.com/index/gpt-5-6/), and
-[Artificial Analysis methodology](https://artificialanalysis.ai/methodology).
+The conductor preserves the user's selected model and reasoning effort. This
+worker policy does not change either setting. The filename is retained for
+upgrade compatibility with existing CAPS installations.
 
-Official API pricing verified on 2026-07-31 is $0.20 input / $1.20 output per
-million tokens for Luna, $2 / $12 for Terra, and $5 / $30 for Sol. Price changes
-expand the candidate set; they do not lower the acceptance, safety, or proof
-gate. See the official [Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna),
-[Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra), and
-[Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol) model pages.
+Evidence basis: the [OpenAI model guide](https://learn.chatgpt.com/docs/models)
+positions Astra for demanding end-to-end work, Sol for complex bounded work,
+Terra for everyday reasoning and tools, and Luna for clear repeatable tasks.
+Model roles are starting hypotheses; real task receipts govern promotion.
+Check current official pricing and live account capabilities before making
+cost or availability claims. No historical price or benchmark sets a route.
 
 ## Hybrid worker packet
 
@@ -27,7 +22,8 @@ Every routed worker declares `worker_kind: subagent | durable_thread`. Use a
 native `subagent` for bounded same-task work; it is never titled or pinned. Use
 `durable_thread` only for an explicit user request, future follow-up, separate
 history, host or worktree, ongoing incident, or release coordination. Start
-with at most four workers and scale to at most ten only for independent,
+with at most three concurrent workers. Larger teams require an explicit owner
+request and remain limited to ten independent,
 deterministic, non-colliding lanes.
 
 When the parent request authorizes local reversible work, the conductor may
@@ -41,7 +37,7 @@ Every packet names one write owner and exact file set. Local reads, analysis,
 tests, and disjoint reversible edits may be allowed. External sends,
 production writes, merge, deploy, publish, credential changes, irreversible
 actions, and authority widening are prohibited by default. Workers cannot
-delegate by default; explicit nested delegation stops at depth two. Ultra is
+delegate by default; owner-requested nested delegation stops at depth two. Ultra is
 root-only.
 
 For mixed-model packets, `fork_turns: none` is the default. Use a bounded
@@ -87,12 +83,18 @@ capability truth; refresh it when provenance or freshness cannot be established.
 | Bounded tool work where repeated personal/runtime evidence shows Luna loses and Sol adds no value | `gpt-5.6-terra` | evaluated effort |
 | Integration-sensitive implementation or multi-step work needing judgment | `gpt-5.6-sol` | `medium` |
 | Ambiguous architecture, deep research, incidents, consequential strategy, computer use, polished high-value deliverables | `gpt-5.6-sol` | `high` or `xhigh` |
-| Rare, indivisible hardest problem | `gpt-5.6-sol` | `max` |
-| Rare, high-value task with multiple genuinely independent workstreams | `gpt-5.6-sol` | `ultra` |
+| Demanding end-to-end work across code, apps, and research | `gpt-6-astra` | `high` or `xhigh` |
+| Rare, indivisible hardest problem | `gpt-6-astra` | `max` |
+| Rare, high-value task with multiple genuinely independent workstreams, root only | selected capable model | supported `ultra` |
 
 Terra is not a guaranteed middle lane. It is an evidence-gated exception: use
 it only when repeated personal evals or runtime receipts show better verified
 completions per minute than passing Luna and Sol candidates for that work shape.
+A bounded Terra trial is also allowed before promotion: use `trial` with
+`deterministic_verification: true` and `safe_retry: true`, a low/medium-risk
+coding, transformation, or proof-review task, local-reversible authority, and
+`probe_then_escalate` with an eligible Sol/Astra fallback. A trial does not
+waive the promotion gate or establish that Terra is better.
 An aggregate intelligence-versus-cost benchmark may motivate a candidate set,
 but it cannot promote or eliminate a route by itself because task-specific tool
 use, retries, latency, and failure cost are outside a single aggregate score.
@@ -108,11 +110,11 @@ delegated worker or create nested Ultra delegation.
 1. Define the quality gate and cost of failure before choosing a model.
 2. Start with the least expensive route expected to pass. Luna is appropriate
    only when the task is precise, safely retryable, and deterministically verified.
-3. Use Terra only when `personal_eval` or `runtime_observation` shows it beats
+3. Outside bounded trials, use Terra only when `personal_eval` or `runtime_observation` shows it beats
    both the passing Luna route and the relevant Sol route on verified successful
    work per minute.
-4. Use Sol when ambiguity, integration judgment, polish, proof, or failure cost
-   makes a probe wasteful.
+4. Use Sol for complex bounded work and Astra for demanding end-to-end work
+   when a cheap probe would add waste or failure risk.
 5. Escalate after one observable quality failure or material scope expansion.
    Count every attempt in elapsed time and usage; do not hide failed probes.
 6. Escalate immediately when the task snapshot proves incomplete, the worker
@@ -148,7 +150,7 @@ atomic install, rollback, host verification, and expiration.
 Natural usage is observational rather than a perfect randomized trial. Treat a
 promotion as a reversible local optimization, expire it after 30 days, and
 continue recording outcomes. Never generalize a task-class winner into a global
-manual default without broader cross-class evidence.
+main model. Route promotion applies to workers; the owner controls the main model.
 
 ## Decision And Authority Envelope
 
@@ -161,7 +163,7 @@ declares `escalation_route`. Put the envelope in the worker's opening instructio
 A Terra decision also carries `calibration`: the receipt reference, Luna and
 Sol comparison set, at least three runs per candidate, and the
 `verified_completions_per_minute` metric. Without that evidence, Terra is not a
-valid operational route.
+valid default route. A bounded `trial` is the explicit exception described above.
 
 - `allowed`: the bounded actions the worker may take.
 - `prohibited`: actions outside its scope or approval boundary.
@@ -183,12 +185,33 @@ model and thinking override. A full-history fork inherits the parent's model
 and thinking and cannot receive an override. Do not describe these mechanisms
 as interchangeable or use `fork_turns: all` for a mixed-model packet.
 
-## Manual Fallback
+## Main Agent and Unavailable Routes
 
-When a task must be done manually, start at `gpt-5.6-sol` with `medium`
-thinking. Emit a one-line switch recommendation only when the route is a
-material mismatch. Continue unless the mismatch is severe; a severe mismatch
-means the current route cannot meet the required proof, safety, or quality gate.
+Preserve the user's selected main model and effort. If the requested worker
+route is unavailable, record requested and resolved model/effort plus the
+verified limitation in `route_resolution`. An Astra-capable workflow may use
+Sol when Astra is not live, entitled, or allowed. Use Luna for clear repeatable
+work and Terra only with trial or promotion evidence. Never silently substitute
+an unsupported effort, and never overwrite config to make a worker route fit.
+If no eligible route can meet the gate, keep the work with the conductor or
+report the exact unavailable capability.
+
+## Concurrency and Nesting
+
+Before every spawn, obtain a fresh inventory of all active workers under the
+root task. Set `fanout.active_workers` to the other active workers and
+`requested_workers` to the new batch size. The total must fit both the live
+runtime capacity and the default cap of three. A larger team requires an
+explicit owner request, recorded as `delegation_request_ref`, and remains
+limited to ten independent, deterministic, noncolliding workers. Metadata
+references record authority; they do not create it.
+
+Workers cannot delegate by default. A depth-two packet or permission to nest
+also requires `delegation_request_ref`; descendants share the root concurrency
+budget. No depth greater than two or worker Ultra is allowed. A stricter
+runtime or project instruction always wins. The standalone validator checks
+the declared counts; only the conductor's fresh inventory establishes live
+concurrency. Durable tasks still require an explicit user request.
 
 ## Advisory Exceptions
 

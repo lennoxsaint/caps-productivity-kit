@@ -1,12 +1,18 @@
 {
   "task_snapshot": {
     "objective": "Exercise an invalid probe.",
-    "scope": ["Validate one fixture."],
-    "acceptance_criteria": ["The fixture is rejected."],
+    "scope": [
+      "Validate one fixture."
+    ],
+    "acceptance_criteria": [
+      "The fixture is rejected."
+    ],
     "risk_level": "low",
     "side_effects": "none",
     "evidence_refs": [],
-    "stop_conditions": ["Stop after validation."]
+    "stop_conditions": [
+      "Stop after validation."
+    ]
   },
   "task_class": "transformation",
   "model": "gpt-5.6-luna",
@@ -16,11 +22,22 @@
   "execution_level": "worker",
   "rationale": "A probe must declare its fallback route.",
   "quality_gate": "Output matches the schema.",
-  "escalate_when": ["The deterministic validator fails."],
+  "escalate_when": [
+    "The deterministic validator fails."
+  ],
   "authority": {
-    "allowed": ["Transform supplied input."],
-    "prohibited": ["Edit the source."],
-    "proof_required": ["Return record counts."],
-    "stop_conditions": ["Stop if input is ambiguous."]
-  }
+    "allowed": [
+      "Transform supplied input."
+    ],
+    "prohibited": [
+      "Edit the source."
+    ],
+    "proof_required": [
+      "Return record counts."
+    ],
+    "stop_conditions": [
+      "Stop if input is ambiguous."
+    ]
+  },
+  "capability_snapshot_digest": "sha256:3af9d5ca430f2ee8d82951d6382a87c13640154e0eec387cdc1b456e19c0c9ff"
 }

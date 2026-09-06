@@ -5,94 +5,511 @@
   "description": "A pre-spawn route bound to a runtime capability snapshot. The verifier is authoritative for cross-field policy checks.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["task_snapshot", "task_class", "requested_model", "requested_thinking", "resolved_model", "resolved_thinking", "capability_snapshot_digest", "route_source", "routing_mode", "evidence_state", "execution_level", "worker_kind", "fork_turns", "delegation_depth", "nested_delegation", "fanout", "rationale", "quality_gate", "escalate_when", "authority"],
+  "required": [
+    "task_snapshot",
+    "task_class",
+    "requested_model",
+    "requested_thinking",
+    "resolved_model",
+    "resolved_thinking",
+    "capability_snapshot_digest",
+    "route_source",
+    "routing_mode",
+    "evidence_state",
+    "execution_level",
+    "worker_kind",
+    "fork_turns",
+    "delegation_depth",
+    "nested_delegation",
+    "fanout",
+    "rationale",
+    "quality_gate",
+    "escalate_when",
+    "authority"
+  ],
   "properties": {
     "task_snapshot": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["objective", "scope", "acceptance_criteria", "risk_level", "side_effects", "evidence_refs", "stop_conditions"],
+      "required": [
+        "objective",
+        "scope",
+        "acceptance_criteria",
+        "risk_level",
+        "side_effects",
+        "evidence_refs",
+        "stop_conditions"
+      ],
       "properties": {
-        "objective": {"type": "string", "minLength": 1},
-        "scope": {"$ref": "#/$defs/nonemptyStringArray"},
-        "acceptance_criteria": {"$ref": "#/$defs/nonemptyStringArray"},
-        "risk_level": {"type": "string", "enum": ["low", "medium", "high"]},
-        "side_effects": {"type": "string", "enum": ["none", "local_reversible", "external_reversible", "irreversible"]},
-        "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
-        "stop_conditions": {"$ref": "#/$defs/nonemptyStringArray"}
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "$ref": "#/$defs/nonemptyStringArray"
+        },
+        "acceptance_criteria": {
+          "$ref": "#/$defs/nonemptyStringArray"
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "side_effects": {
+          "type": "string",
+          "enum": [
+            "none",
+            "local_reversible",
+            "external_reversible",
+            "irreversible"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "stop_conditions": {
+          "$ref": "#/$defs/nonemptyStringArray"
+        }
       }
     },
-    "task_class": {"type": "string", "enum": ["coding", "research_strategy", "computer_use", "content_polish", "transformation", "proof_review"]},
-    "requested_model": {"type": "string", "minLength": 1},
-    "requested_thinking": {"type": "string", "minLength": 1},
-    "resolved_model": {"type": "string", "minLength": 1},
-    "resolved_thinking": {"type": "string", "minLength": 1},
-    "model": {"type": "string", "minLength": 1, "deprecated": true, "description": "Optional compatibility alias; when present it must equal resolved_model."},
-    "thinking": {"type": "string", "minLength": 1, "deprecated": true, "description": "Optional compatibility alias; when present it must equal resolved_thinking."},
-    "capability_snapshot_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
-    "route_source": {"type": "string", "enum": ["selected", "inherited"]},
+    "task_class": {
+      "type": "string",
+      "enum": [
+        "coding",
+        "research_strategy",
+        "computer_use",
+        "content_polish",
+        "transformation",
+        "proof_review"
+      ]
+    },
+    "requested_model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_thinking": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resolved_model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resolved_thinking": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "deprecated": true,
+      "description": "Optional compatibility alias; when present it must equal resolved_model."
+    },
+    "thinking": {
+      "type": "string",
+      "minLength": 1,
+      "deprecated": true,
+      "description": "Optional compatibility alias; when present it must equal resolved_thinking."
+    },
+    "capability_snapshot_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "route_source": {
+      "type": "string",
+      "enum": [
+        "selected",
+        "inherited"
+      ]
+    },
     "route_resolution": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["reason", "limitation"],
+      "required": [
+        "reason",
+        "limitation"
+      ],
       "properties": {
-        "reason": {"type": "string", "enum": ["unsupported_model", "unsupported_effort", "not_live", "not_entitled", "policy_blocked"]},
-        "limitation": {"type": "string", "minLength": 1, "maxLength": 160}
+        "reason": {
+          "type": "string",
+          "enum": [
+            "unsupported_model",
+            "unsupported_effort",
+            "not_live",
+            "not_entitled",
+            "policy_blocked"
+          ]
+        },
+        "limitation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
       }
     },
     "parent_route": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["model", "thinking", "capability_snapshot_digest"],
+      "required": [
+        "model",
+        "thinking",
+        "capability_snapshot_digest"
+      ],
       "properties": {
-        "model": {"type": "string", "minLength": 1},
-        "thinking": {"type": "string", "minLength": 1},
-        "capability_snapshot_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "thinking": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability_snapshot_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
       }
     },
-    "routing_mode": {"type": "string", "enum": ["direct", "probe_then_escalate"]},
-    "evidence_state": {"type": "string", "enum": ["official_guidance", "external_benchmark", "personal_eval", "runtime_observation"]},
-    "execution_level": {"type": "string", "enum": ["root", "worker"]},
-    "worker_kind": {"type": "string", "enum": ["subagent", "durable_thread"]},
-    "fork_turns": {"type": "string", "pattern": "^(none|all|[1-9][0-9]*)$", "description": "none is the mixed-model default; all requires an inherited parent route and forbids a model or thinking override."},
-    "delegation_depth": {"type": "integer", "minimum": 0, "maximum": 2},
-    "nested_delegation": {"type": "boolean"},
+    "routing_mode": {
+      "type": "string",
+      "enum": [
+        "direct",
+        "probe_then_escalate"
+      ]
+    },
+    "evidence_state": {
+      "type": "string",
+      "enum": [
+        "official_guidance",
+        "external_benchmark",
+        "personal_eval",
+        "runtime_observation"
+      ]
+    },
+    "execution_level": {
+      "type": "string",
+      "enum": [
+        "root",
+        "worker"
+      ]
+    },
+    "worker_kind": {
+      "type": "string",
+      "enum": [
+        "subagent",
+        "durable_thread"
+      ]
+    },
+    "fork_turns": {
+      "type": "string",
+      "pattern": "^(none|all|[1-9][0-9]*)$",
+      "description": "none is the mixed-model default; all requires an inherited parent route and forbids a model or thinking override."
+    },
+    "delegation_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "nested_delegation": {
+      "type": "boolean"
+    },
     "fanout": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["requested_workers", "independent", "deterministic", "noncolliding"],
+      "required": [
+        "requested_workers",
+        "independent",
+        "deterministic",
+        "noncolliding",
+        "active_workers"
+      ],
       "properties": {
-        "requested_workers": {"type": "integer", "minimum": 0, "maximum": 10},
-        "independent": {"type": "boolean"},
-        "deterministic": {"type": "boolean"},
-        "noncolliding": {"type": "boolean"}
+        "requested_workers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "independent": {
+          "type": "boolean"
+        },
+        "deterministic": {
+          "type": "boolean"
+        },
+        "noncolliding": {
+          "type": "boolean"
+        },
+        "active_workers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Other active workers across the entire root task, from a fresh live inventory."
+        }
       }
     },
-    "rationale": {"type": "string", "minLength": 1},
-    "quality_gate": {"type": "string", "minLength": 1},
-    "escalate_when": {"$ref": "#/$defs/nonemptyStringArray"},
-    "escalation_route": {"type": "object", "additionalProperties": false, "required": ["model", "thinking"], "properties": {"model": {"type": "string", "minLength": 1}, "thinking": {"type": "string", "minLength": 1}}},
-    "calibration": {"type": "object", "additionalProperties": false, "required": ["receipt", "compared_models", "runs_per_candidate", "metric"], "properties": {"receipt": {"type": "string", "minLength": 1}, "compared_models": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}, "runs_per_candidate": {"type": "integer", "minimum": 3}, "metric": {"const": "verified_completions_per_minute"}}},
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quality_gate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "escalate_when": {
+      "$ref": "#/$defs/nonemptyStringArray"
+    },
+    "escalation_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model",
+        "thinking"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "thinking": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "calibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt",
+        "compared_models",
+        "runs_per_candidate",
+        "metric"
+      ],
+      "properties": {
+        "receipt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compared_models": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "runs_per_candidate": {
+          "type": "integer",
+          "minimum": 3
+        },
+        "metric": {
+          "const": "verified_completions_per_minute"
+        }
+      }
+    },
     "authority": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["ceiling", "allowed_actions", "prohibited_actions", "allowed", "prohibited", "proof_required", "stop_conditions"],
+      "required": [
+        "ceiling",
+        "allowed_actions",
+        "prohibited_actions",
+        "allowed",
+        "prohibited",
+        "proof_required",
+        "stop_conditions"
+      ],
       "properties": {
-        "ceiling": {"type": "string", "enum": ["none", "local_reversible", "external_reversible", "irreversible"]},
-        "allowed_actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["read", "analyze", "test", "local_reversible_edit", "durable_thread_control"]}},
-        "prohibited_actions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["external_send", "production_write", "merge", "deploy", "publish", "credential_change", "irreversible_action", "authority_widening"]}},
-        "allowed": {"$ref": "#/$defs/nonemptyStringArray"},
-        "prohibited": {"$ref": "#/$defs/nonemptyStringArray"},
-        "proof_required": {"$ref": "#/$defs/nonemptyStringArray"},
-        "stop_conditions": {"$ref": "#/$defs/nonemptyStringArray"}
+        "ceiling": {
+          "type": "string",
+          "enum": [
+            "none",
+            "local_reversible",
+            "external_reversible",
+            "irreversible"
+          ]
+        },
+        "allowed_actions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "read",
+              "analyze",
+              "test",
+              "local_reversible_edit",
+              "durable_thread_control"
+            ]
+          }
+        },
+        "prohibited_actions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "external_send",
+              "production_write",
+              "merge",
+              "deploy",
+              "publish",
+              "credential_change",
+              "irreversible_action",
+              "authority_widening"
+            ]
+          }
+        },
+        "allowed": {
+          "$ref": "#/$defs/nonemptyStringArray"
+        },
+        "prohibited": {
+          "$ref": "#/$defs/nonemptyStringArray"
+        },
+        "proof_required": {
+          "$ref": "#/$defs/nonemptyStringArray"
+        },
+        "stop_conditions": {
+          "$ref": "#/$defs/nonemptyStringArray"
+        }
       }
     },
-    "advisory_fallback": {"type": "object", "additionalProperties": false, "required": ["provider", "role", "reason"], "properties": {"provider": {"type": "string", "minLength": 1}, "role": {"type": "string", "enum": ["planner", "reviewer", "council"]}, "reason": {"type": "string", "minLength": 1}}}
+    "advisory_fallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "role",
+        "reason"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "planner",
+            "reviewer",
+            "council"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "delegation_request_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference to the explicit owner request for an expanded team or nested delegation; metadata does not itself grant authority."
+    },
+    "trial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deterministic_verification",
+        "safe_retry"
+      ],
+      "properties": {
+        "deterministic_verification": {
+          "const": true
+        },
+        "safe_retry": {
+          "const": true
+        }
+      },
+      "description": "Bounded observational probe, not evidence of promotion; requires a supported escalation route."
+    }
   },
   "allOf": [
-    {"if": {"properties": {"routing_mode": {"const": "probe_then_escalate"}}}, "then": {"required": ["escalation_route"]}},
-    {"if": {"properties": {"route_source": {"const": "inherited"}}}, "then": {"required": ["parent_route"]}},
-    {"if": {"properties": {"fork_turns": {"const": "all"}}}, "then": {"properties": {"route_source": {"const": "inherited"}}, "required": ["parent_route"]}},
-    {"if": {"properties": {"resolved_thinking": {"const": "ultra"}}}, "then": {"properties": {"execution_level": {"const": "root"}, "delegation_depth": {"const": 0}}}}
+    {
+      "if": {
+        "properties": {
+          "routing_mode": {
+            "const": "probe_then_escalate"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "escalation_route"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "route_source": {
+            "const": "inherited"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "parent_route"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "fork_turns": {
+            "const": "all"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "route_source": {
+            "const": "inherited"
+          }
+        },
+        "required": [
+          "parent_route"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolved_thinking": {
+            "const": "ultra"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution_level": {
+            "const": "root"
+          },
+          "delegation_depth": {
+            "const": 0
+          }
+        }
+      }
+    }
   ],
-  "$defs": {"nonemptyStringArray": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}}
+  "$defs": {
+    "nonemptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
 }

@@ -87,6 +87,7 @@ def decision(capabilities: dict, **updates) -> dict:
         "nested_delegation": False,
         "fanout": {
             "requested_workers": 1,
+            "active_workers": 0,
             "independent": True,
             "deterministic": True,
             "noncolliding": True,
@@ -162,6 +163,16 @@ class CapabilitySnapshotTests(unittest.TestCase):
 
 
 class DynamicRoutingTests(unittest.TestCase):
+    def test_escalation_rejects_same_route_and_wrong_specialist(self):
+        catalog = snapshot()
+        for route, expected in (
+            ({"model": "gpt-next-code", "thinking": "medium"}, "escalation must differ"),
+            ({"model": "daybreak-research", "thinking": "high"}, "escalation specialist"),
+        ):
+            with self.subTest(route=route):
+                value = decision(catalog, routing_mode="probe_then_escalate", escalation_route=route)
+                self.assertTrue(any(expected in error for error in ROUTING.validate(value, catalog)))
+
     def setUp(self):
         self.capabilities = snapshot()
 
@@ -307,19 +318,58 @@ class DynamicRoutingTests(unittest.TestCase):
     def test_worker_kind_is_explicit(self):
         self.assertInvalid(decision(self.capabilities, worker_kind="background_job"), "invalid worker_kind")
 
-    def test_fanout_starts_at_four_and_scales_to_ten_only_for_safe_lanes(self):
+    def test_three_worker_limit_includes_existing_workers(self):
         base = decision(self.capabilities)
-        base["fanout"] = dict(base["fanout"], requested_workers=4, independent=False)
+        base['fanout'].update(requested_workers=3)
         self.assertEqual(ROUTING.validate(base, self.capabilities), [])
-        scaled = decision(self.capabilities)
-        scaled["fanout"] = dict(scaled["fanout"], requested_workers=10)
-        self.assertEqual(ROUTING.validate(scaled, self.capabilities), [])
-        unsafe = decision(self.capabilities)
-        unsafe["fanout"] = dict(unsafe["fanout"], requested_workers=5, noncolliding=False)
-        self.assertInvalid(unsafe, "fanout above 4 requires independent, deterministic, noncolliding lanes")
-        too_many = decision(self.capabilities)
-        too_many["fanout"] = dict(too_many["fanout"], requested_workers=11)
-        self.assertInvalid(too_many, "fanout cannot exceed 10")
+        base['fanout']['active_workers'] = 1
+        self.assertInvalid(base, 'more than three concurrent workers requires an explicit owner request')
+        base['delegation_request_ref'] = 'owner-request-1'
+        self.assertEqual(ROUTING.validate(base, self.capabilities), [])
+        base['fanout']['active_workers'] = 8
+        self.assertInvalid(base, 'total concurrent workers cannot exceed 10')
+
+    def test_expansion_and_nesting_need_owner_request(self):
+        base = decision(self.capabilities, delegation_depth=2)
+        self.assertInvalid(base, 'nested delegation requires an explicit owner request')
+        base['delegation_request_ref'] = 'owner-request-2'
+        self.assertEqual(ROUTING.validate(base, self.capabilities), [])
+        base['fanout'].update(requested_workers=4, deterministic=False)
+        self.assertInvalid(base, 'expanded teams require deterministic lanes')
+
+    def test_nonindependent_workers_are_rejected(self):
+        base = decision(self.capabilities)
+        base['fanout']['noncolliding'] = False
+        self.assertInvalid(base, 'workers require independent, noncolliding lanes')
+
+    def test_astra_support_and_unavailability_are_runtime_bound(self):
+        catalog = snapshot()
+        catalog['models'].append(dict(catalog['models'][0], id='gpt-6-astra'))
+        catalog = CAPABILITIES.build_snapshot({k: v for k, v in catalog.items() if k != 'digest'})
+        base = decision(catalog, requested_model='gpt-6-astra', resolved_model='gpt-6-astra')
+        self.assertEqual(ROUTING.validate(base, catalog), [])
+        catalog['models'][-1]['entitled'] = False
+        catalog = CAPABILITIES.build_snapshot({k: v for k, v in catalog.items() if k != 'digest'})
+        base['capability_snapshot_digest'] = catalog['digest']
+        self.assertIn('resolved route must be live, entitled, and allowed by policy', ROUTING.validate(base, catalog))
+        base.update(resolved_model='gpt-5.6-sol', route_resolution={'reason':'not_entitled','limitation':'Astra is not entitled on this runtime.'})
+        self.assertEqual(ROUTING.validate(base, catalog), [])
+
+    def test_terra_trial_requires_safe_scope_and_eligible_escalation(self):
+        catalog = snapshot()
+        catalog['models'].append(dict(catalog['models'][0], id='gpt-5.6-terra'))
+        catalog = CAPABILITIES.build_snapshot({k: v for k, v in catalog.items() if k != 'digest'})
+        base = decision(catalog, requested_model='gpt-5.6-terra', resolved_model='gpt-5.6-terra', evidence_state='official_guidance')
+        self.assertIn('terra requires calibration evidence', ROUTING.validate(base, catalog))
+        base.update(trial={'deterministic_verification':True, 'safe_retry':True}, routing_mode='probe_then_escalate', escalation_route={'model':'gpt-5.6-sol','thinking':'medium'})
+        self.assertEqual(ROUTING.validate(base, catalog), [])
+        base['task_snapshot']['risk_level'] = 'high'
+        self.assertIn('trial must be bounded, non-high-risk, and locally reversible', ROUTING.validate(base, catalog))
+        base['task_snapshot']['risk_level'] = 'low'
+        catalog['models'][0]['entitled'] = False
+        catalog = CAPABILITIES.build_snapshot({k: v for k, v in catalog.items() if k != 'digest'})
+        base['capability_snapshot_digest'] = catalog['digest']
+        self.assertIn('escalation_route must be supported, live, entitled, and allowed by policy', ROUTING.validate(base, catalog))
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ Use workers for independent lanes:
 
 Do not create workers for tiny tasks. Coordination has a cost.
 
-For every real worker packet, choose `worker_kind`, the GPT-5.6 route, and
+For every real worker packet, choose `worker_kind`, the capability-verified route, and
 authority envelope before creating it. See `docs/gpt-5-6-routing.md`; the
 decision must conform to `schemas/routing-decision.schema.json`. Pass exact
 `model`, `thinking`, and `fork_turns` values to the requested worker kind. Only

@@ -80,9 +80,9 @@ When the user brain-dumps:
 - Otherwise choose `subagent` by default. Propose a durable worker only when a
   qualifying persistence reason exists, with title, workspace, outcome, stop
   condition, proof requirement, approval gates, and unpin rule.
-- Start with at most four workers; scale to at most ten only for independent,
+- Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
   deterministic, non-colliding work. Workers cannot delegate by default;
-  explicit nested delegation stops at depth two. Ultra is root-only.
+  owner-requested nested delegation stops at depth two. Ultra is root-only.
 - Before creating or routing multiple lanes, show the proposed split as a
   compact lane tree. Use Mermaid `flowchart TD` by default, SCDiagram when the
   workspace supports richer notation, and native image jam only when a rendered

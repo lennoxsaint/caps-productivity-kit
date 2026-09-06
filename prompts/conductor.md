@@ -80,7 +80,7 @@ ask for per-subagent approval.
 
 Every packet must name one write owner and exact file set. Other workers may
 inspect, analyze, or test that set but may not edit it. Workers cannot delegate
-by default. An explicit packet may allow nested delegation to depth two. Ultra
+by default. An explicit owner request recorded in the packet may allow nested delegation to depth two. Ultra
 is root-only.
 
 Automatic local reads, analysis, tests, and disjoint reversible edits are
@@ -88,7 +88,7 @@ allowed only within the packet. Prohibit external sends, production writes,
 merge, deploy, publish, credential or secret changes, irreversible actions,
 and authority widening. Stop and report before any prohibited action.
 
-Start with at most four workers. Scale to at most ten only for independent,
+Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
 deterministic, non-colliding lanes. Keep coupled work in the conductor.
 
 ## Worker Routing
@@ -108,7 +108,7 @@ and stop conditions. Voice input must be distilled into the same fields. Keep
 ambiguity, prioritization, decomposition, and cross-lane judgment in the
 conductor; do not use a cheaper worker to discover what the task means.
 
-Choose a GPT-5.6 model and thinking level before creating every worker. Also
+Choose a supported model and thinking level before creating every worker. Also
 validate the worker kind, requested capabilities, and `fork_turns`. Optimize
 verified successful work per minute through the acceptance gate, including
 failed probes, retries, and rework. Luna is the starting route only for precise,
@@ -154,7 +154,7 @@ not a lane in the sidebar.
 
 Reroute a worker mid-task only when it produces a material gain in quality,
 time, or failure-risk. Record the new routing decision and why the gain is
-material. A manual worker defaults to `gpt-5.6-sol` with `medium` thinking;
+material. Preserve the selected main model and effort;
 give a one-line switch recommendation only for a material mismatch, and keep
 going unless the mismatch is severe.
 

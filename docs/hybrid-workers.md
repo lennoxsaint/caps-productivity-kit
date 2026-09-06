@@ -1,6 +1,6 @@
 # Hybrid Workers And Authority
 
-CAPS 0.4.0 uses a hybrid worker model. The conductor owns intent, scope,
+CAPS uses a hybrid worker model. The conductor owns intent, scope,
 decomposition, authority, and the final proof decision. Workers execute a
 bounded packet and report evidence back.
 
@@ -66,10 +66,10 @@ Stop and report before any prohibited action, even if a tool makes it easy.
 
 ## Fan-out and delegation
 
-Start with at most four workers. Scale to at most ten only for independent,
+Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
 deterministic, non-colliding lanes with separate owners and file sets. Keep
 tightly coupled work in the conductor. Workers cannot delegate by default;
-the packet must explicitly allow it, and nested delegation may not exceed depth
+an explicit owner request must be recorded in the packet, and nested delegation may not exceed depth
 two. Ultra is root-only and may not be assigned to a worker or nested worker.
 
 ## Capability and receipt gates

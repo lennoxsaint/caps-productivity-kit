@@ -1,12 +1,21 @@
 {
   "task_snapshot": {
     "objective": "Reconcile independent evidence lanes.",
-    "scope": ["Delegate read-only checks.", "Reconcile conflicting evidence."],
-    "acceptance_criteria": ["Every lane returns inspectable proof."],
+    "scope": [
+      "Delegate read-only checks.",
+      "Reconcile conflicting evidence."
+    ],
+    "acceptance_criteria": [
+      "Every lane returns inspectable proof."
+    ],
     "risk_level": "high",
     "side_effects": "none",
-    "evidence_refs": ["review-manifest"],
-    "stop_conditions": ["Stop if lanes require shared mutable state."]
+    "evidence_refs": [
+      "review-manifest"
+    ],
+    "stop_conditions": [
+      "Stop if lanes require shared mutable state."
+    ]
   },
   "task_class": "proof_review",
   "requested_model": "gpt-5.6-sol",
@@ -15,7 +24,7 @@
   "resolved_thinking": "ultra",
   "model": "gpt-5.6-sol",
   "thinking": "ultra",
-  "capability_snapshot_digest": "sha256:da865314924c88a6cfcda0ad760f0b72e46300b98f535baf741b79c1fb7f73dc",
+  "capability_snapshot_digest": "sha256:3af9d5ca430f2ee8d82951d6382a87c13640154e0eec387cdc1b456e19c0c9ff",
   "route_source": "selected",
   "routing_mode": "direct",
   "evidence_state": "official_guidance",
@@ -24,17 +33,47 @@
   "fork_turns": "none",
   "delegation_depth": 0,
   "nested_delegation": false,
-  "fanout": {"requested_workers": 4, "independent": true, "deterministic": true, "noncolliding": true},
+  "fanout": {
+    "requested_workers": 4,
+    "independent": true,
+    "deterministic": true,
+    "noncolliding": true,
+    "active_workers": 0
+  },
   "rationale": "The high-value review has multiple independent evidence lanes.",
   "quality_gate": "Each independent lane returns evidence and the conductor reconciles conflicts.",
-  "escalate_when": ["Two lanes require writes to the same files."],
+  "escalate_when": [
+    "Two lanes require writes to the same files."
+  ],
   "authority": {
     "ceiling": "none",
-    "allowed_actions": ["read", "analyze", "durable_thread_control"],
-    "prohibited_actions": ["external_send", "production_write", "merge", "deploy", "publish", "credential_change", "irreversible_action", "authority_widening"],
-    "allowed": ["Delegate independent read-only evidence checks."],
-    "prohibited": ["Delegate merges, deploys, public sends, or destructive actions."],
-    "proof_required": ["Identify each lane, source, result, and unresolved conflict."],
-    "stop_conditions": ["Stop if the work cannot be split without shared mutable state."]
-  }
+    "allowed_actions": [
+      "read",
+      "analyze",
+      "durable_thread_control"
+    ],
+    "prohibited_actions": [
+      "external_send",
+      "production_write",
+      "merge",
+      "deploy",
+      "publish",
+      "credential_change",
+      "irreversible_action",
+      "authority_widening"
+    ],
+    "allowed": [
+      "Delegate independent read-only evidence checks."
+    ],
+    "prohibited": [
+      "Delegate merges, deploys, public sends, or destructive actions."
+    ],
+    "proof_required": [
+      "Identify each lane, source, result, and unresolved conflict."
+    ],
+    "stop_conditions": [
+      "Stop if the work cannot be split without shared mutable state."
+    ]
+  },
+  "delegation_request_ref": "example-owner-request"
 }

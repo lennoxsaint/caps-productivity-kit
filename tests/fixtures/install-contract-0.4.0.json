@@ -33,7 +33,6 @@
     "docs/naming-and-pinning.md",
     "docs/operator-loop.md",
     "docs/packs.md",
-    "docs/release-0.5.0.md",
     "docs/setup-guide.md",
     "docs/updates.md",
     "examples/feature-build/README.md",
@@ -81,8 +80,6 @@
     "templates/AGENTS.repo.md",
     "templates/authority-envelope.md",
     "templates/adjacent-repo-link.md",
-    "templates/worker-packet.md",
-    "examples/routing/valid-astra.json",
-    "examples/routing/valid-terra-trial.json"
+    "templates/worker-packet.md"
   ]
 }

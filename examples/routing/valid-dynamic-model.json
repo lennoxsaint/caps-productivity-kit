@@ -1,11 +1,27 @@
 {
-  "task_snapshot": {"objective": "Review a bounded change.", "scope": ["Named files only."], "acceptance_criteria": ["Review findings cite lines."], "risk_level": "low", "side_effects": "none", "evidence_refs": ["runtime-catalog"], "stop_conditions": ["Stop on scope expansion."]},
+  "task_snapshot": {
+    "objective": "Review a bounded change.",
+    "scope": [
+      "Named files only."
+    ],
+    "acceptance_criteria": [
+      "Review findings cite lines."
+    ],
+    "risk_level": "low",
+    "side_effects": "none",
+    "evidence_refs": [
+      "runtime-catalog"
+    ],
+    "stop_conditions": [
+      "Stop on scope expansion."
+    ]
+  },
   "task_class": "proof_review",
   "requested_model": "gpt-5.5",
   "requested_thinking": "high",
   "resolved_model": "gpt-5.5",
   "resolved_thinking": "high",
-  "capability_snapshot_digest": "sha256:da865314924c88a6cfcda0ad760f0b72e46300b98f535baf741b79c1fb7f73dc",
+  "capability_snapshot_digest": "sha256:3af9d5ca430f2ee8d82951d6382a87c13640154e0eec387cdc1b456e19c0c9ff",
   "route_source": "selected",
   "routing_mode": "direct",
   "evidence_state": "runtime_observation",
@@ -14,9 +30,45 @@
   "fork_turns": "none",
   "delegation_depth": 1,
   "nested_delegation": false,
-  "fanout": {"requested_workers": 1, "independent": true, "deterministic": true, "noncolliding": true},
+  "fanout": {
+    "requested_workers": 1,
+    "independent": true,
+    "deterministic": true,
+    "noncolliding": true,
+    "active_workers": 0
+  },
   "rationale": "This non-5.6 model is live, entitled, policy-allowed, and advertises the requested reasoning level.",
   "quality_gate": "Every finding cites an exact source location.",
-  "escalate_when": ["The evidence is incomplete."],
-  "authority": {"ceiling": "none", "allowed_actions": ["read", "analyze"], "prohibited_actions": ["external_send", "production_write", "merge", "deploy", "publish", "credential_change", "irreversible_action", "authority_widening"], "allowed": ["Read named local files."], "prohibited": ["Edit, send, or deploy."], "proof_required": ["Return line references."], "stop_conditions": ["Stop on scope expansion."]}
+  "escalate_when": [
+    "The evidence is incomplete."
+  ],
+  "authority": {
+    "ceiling": "none",
+    "allowed_actions": [
+      "read",
+      "analyze"
+    ],
+    "prohibited_actions": [
+      "external_send",
+      "production_write",
+      "merge",
+      "deploy",
+      "publish",
+      "credential_change",
+      "irreversible_action",
+      "authority_widening"
+    ],
+    "allowed": [
+      "Read named local files."
+    ],
+    "prohibited": [
+      "Edit, send, or deploy."
+    ],
+    "proof_required": [
+      "Return line references."
+    ],
+    "stop_conditions": [
+      "Stop on scope expansion."
+    ]
+  }
 }
