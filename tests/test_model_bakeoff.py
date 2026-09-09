@@ -55,8 +55,10 @@ class ModelBakeoffTests(unittest.TestCase):
         self.assertEqual(output["profile"]["visibility"], "private")
         self.assertEqual(
             output["public_fallback"]["coding"],
-            {"model": "gpt-5.6-sol", "thinking": "medium"},
+            {"model": "gpt-5.6-luna", "thinking": "max"},
         )
+        self.assertEqual(output["policy_action"], "recommendation_only")
+        self.assertEqual(output["subscription_consumption"], "unknown")
 
     def test_valid_results_preserve_only_redacted_traceability_bindings(self):
         payload = load_fixture("valid-results.json")

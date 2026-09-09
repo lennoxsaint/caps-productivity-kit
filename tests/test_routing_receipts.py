@@ -23,6 +23,7 @@ def receipt(
 ) -> dict:
     return {
         "schema_version": "1.2",
+        "event_type": "receipt",
         "task_class": "coding",
         "requested_model": model,
         "requested_thinking": thinking,
@@ -40,6 +41,14 @@ def receipt(
         "capability_verified": capability_verified,
         "observability_state": "complete",
         "learning_eligibility": "eligible" if eligible else "ineligible",
+        "lead_reviewed": True,
+        "task_checks": [{"label": "tests", "passed": True}],
+        "task_checks_passed": True,
+        "attempts": 1,
+        "correction_count": 0,
+        "owner_correction_count": 0,
+        "subscription_usage": None,
+        "subscription_usage_source": None,
     }
 
 
@@ -54,7 +63,8 @@ class RoutingReceiptTests(unittest.TestCase):
             ])
         evaluation = MODULE.evaluate(values, 30, 5, 0.10)
         result = evaluation["task_classes"]["coding"]["recommendation"]
-        self.assertTrue(result["promoted"])
+        self.assertFalse(result["promoted"])
+        self.assertTrue(result["recommended"])
         self.assertEqual(result["model"], "gpt-5.6-terra")
         self.assertEqual(evaluation["qualified_receipt_count"], 30)
 

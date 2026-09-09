@@ -247,7 +247,7 @@ receipt_tmp="$(mktemp -d)"
 trap 'rm -rf "$receipt_tmp"' EXIT
 receipt_id="$(python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" start --task-class coding --model gpt-5.6-sol --thinking medium --worker-kind subagent --delegation-depth 1 --capability-snapshot-digest "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" --route-reason policy --quality-gate-id tests --task-snapshot-complete --profile-version test)"
 python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" bind --receipt-id "$receipt_id" --worker-ref test-worker >/dev/null
-python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" finish --receipt-id "$receipt_id" --outcome pass --delegation-quality complete --capability-verified --proof-ref tests >/dev/null
+python3 "$root/scripts/routing-receipt.py" --store "$receipt_tmp/receipts.jsonl" finish --receipt-id "$receipt_id" --outcome pass --delegation-quality complete --capability-verified --lead-reviewed --checks-passed --task-check tests=pass --proof-ref tests >/dev/null
 python3 "$root/scripts/evaluate-routing-receipts.py" --store "$receipt_tmp/receipts.jsonl" --output "$receipt_tmp/evaluation.json" >/dev/null
 python3 - "$receipt_tmp" <<'PY'
 import json

@@ -318,16 +318,14 @@ class DynamicRoutingTests(unittest.TestCase):
     def test_worker_kind_is_explicit(self):
         self.assertInvalid(decision(self.capabilities, worker_kind="background_job"), "invalid worker_kind")
 
-    def test_three_worker_limit_includes_existing_workers(self):
+    def test_six_worker_limit_includes_existing_workers(self):
         base = decision(self.capabilities)
         base['fanout'].update(requested_workers=3)
         self.assertEqual(ROUTING.validate(base, self.capabilities), [])
-        base['fanout']['active_workers'] = 1
-        self.assertInvalid(base, 'more than three concurrent workers requires an explicit owner request')
-        base['delegation_request_ref'] = 'owner-request-1'
+        base['fanout']['active_workers'] = 3
         self.assertEqual(ROUTING.validate(base, self.capabilities), [])
-        base['fanout']['active_workers'] = 8
-        self.assertInvalid(base, 'total concurrent workers cannot exceed 10')
+        base['fanout']['active_workers'] = 4
+        self.assertInvalid(base, 'total concurrent workers cannot exceed 6')
 
     def test_expansion_and_nesting_need_owner_request(self):
         base = decision(self.capabilities, delegation_depth=2)
@@ -335,7 +333,7 @@ class DynamicRoutingTests(unittest.TestCase):
         base['delegation_request_ref'] = 'owner-request-2'
         self.assertEqual(ROUTING.validate(base, self.capabilities), [])
         base['fanout'].update(requested_workers=4, deterministic=False)
-        self.assertInvalid(base, 'expanded teams require deterministic lanes')
+        self.assertEqual(ROUTING.validate(base, self.capabilities), [])
 
     def test_nonindependent_workers_are_rejected(self):
         base = decision(self.capabilities)

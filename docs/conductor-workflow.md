@@ -56,9 +56,10 @@ conditions; the worker receives that bounded packet instead of reconstructing
 intent from a raw brain dump or voice transcript.
 
 Optimize verified successful work per minute through that proof gate. Count
-failed probes, retries, and rework. Use Luna for safe deterministic probes,
-Terra only with repeated personal/runtime evidence, and Sol when ambiguity or
-failure cost makes probing wasteful. Ultra is a root-only topology and must not
+failed attempts, review, and rework. Default to Luna Max, at most one useful
+targeted correction, one Sol Extra High attempt, then one separate Astra Medium
+worker attempt. Sol-first needs a recorded reason. Missing access or evidence
+does not escalate models. Learning remains recommendation-only. Ultra is root-only and must not
 be assigned to an already delegated worker.
 
 For complex, proof-sensitive, or multi-surface work, first decide whether the

@@ -66,8 +66,8 @@ Stop and report before any prohibited action, even if a tool makes it easy.
 
 ## Fan-out and delegation
 
-Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
-deterministic, non-colliding lanes with separate owners and file sets. Keep
+Allow at most six concurrent workers per root, excluding the lead, for independent,
+non-colliding lanes with separate owners and file sets. Six is a ceiling, not a target. Keep
 tightly coupled work in the conductor. Workers cannot delegate by default;
 an explicit owner request must be recorded in the packet, and nested delegation may not exceed depth
 two. Ultra is root-only and may not be assigned to a worker or nested worker.

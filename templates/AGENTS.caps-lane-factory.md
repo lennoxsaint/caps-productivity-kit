@@ -16,17 +16,21 @@ This workspace uses CAPS, the Codex Agent Productivity System.
   or pinned.
 - Route work to an existing durable lane before creating a duplicate durable
   lane. Keep quick answers and tightly coupled work in the conductor.
-- Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten when lanes are
-  independent, deterministic, and non-colliding with separate write owners.
+- Allow at most six concurrent workers per root, excluding the lead. Six is a
+  ceiling, not a target. Use independent, non-colliding lanes with separate write owners.
   Count all active descendants against the root cap before every spawn.
 - Before every worker, create a routing decision using
   `.caps/docs/gpt-5-6-routing.md` and `.caps/schemas/routing-decision.schema.json`.
   Complete its redacted task snapshot before routing, then include the snapshot
   and authority envelope in the worker prompt.
-- Optimize verified successful work per minute, including retries and rework.
-  Astra handles demanding end-to-end work, Sol complex bounded work, and Luna
-  clear repeatable work. Trial Terra only with deterministic checks and safe
-  retry; default-route promotion requires real comparative evidence.
+- Default new interactive tasks to Astra Low; preserve existing selected routes.
+  Default workers to Luna Max, allow one useful targeted correction, then one
+  Sol Extra High attempt and one separate Astra Medium worker attempt. Stop
+  after exhaustion. Sol-first needs a concrete reasoning/correctness reason.
+  Skip unavailable tiers with recorded limitations; access, source, permission,
+  and infrastructure blockers do not escalate models. Keep standard service tier.
+  Count checks, lead review, retries, and owner corrections. Unknown subscription
+  usage stays unknown. Learning is recommendation-only; never auto-promote policy.
 - Validate worker kind, model, thinking, `fork_turns`, and (for durable
   threads) native title/pin controls before execution. Never silently
   substitute a capability. For a mixed-model packet, `fork_turns` is `none`

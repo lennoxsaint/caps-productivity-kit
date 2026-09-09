@@ -2,7 +2,7 @@
   "snapshot_version": "1.0",
   "captured_at": "2026-08-16T00:00:00Z",
   "source": "caps-test-fixture",
-  "digest": "sha256:3af9d5ca430f2ee8d82951d6382a87c13640154e0eec387cdc1b456e19c0c9ff",
+  "digest": "sha256:4d62b51aacc3936c5f7950882761cadc82c9823d00ed45d66dde364b3d4abe5a",
   "models": [
     {
       "id": "gpt-5.6-luna",
@@ -10,7 +10,9 @@
       "reasoning_levels": [
         "low",
         "medium",
-        "high"
+        "high",
+        "xhigh",
+        "max"
       ],
       "live": true,
       "entitled": true,

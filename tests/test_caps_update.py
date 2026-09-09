@@ -90,7 +90,7 @@ class CapsUpdateTests(unittest.TestCase):
             digest="a" * 64,
         )
         self.assertEqual(value["minimum_updater_version"], "0.3.3")
-        self.assertEqual(value["rollback_version"], "0.4.0")
+        self.assertEqual(value["rollback_version"], "0.5.0")
         self.assertIsNone(UPDATE.compatibility_error(value, "1.0"))
 
     def test_v032_updater_produces_a_verifiable_v033_install(self):
@@ -394,6 +394,61 @@ class CapsUpdateTests(unittest.TestCase):
             self.assertFalse((project / ".caps/scripts/example.py").exists())
             installed = json.loads((project / ".caps/install-manifest.json").read_text())
             self.assertEqual(installed["version"], "0.2.0")
+
+    def test_rollback_refuses_later_owner_edit_before_restoring_anything(self):
+        archive = release_archive()
+        with tempfile.TemporaryDirectory() as temporary:
+            project = self.make_project(Path(temporary))
+            original_fetch = UPDATE.fetch_bytes
+            try:
+                UPDATE.fetch_bytes = lambda _url: archive
+                UPDATE.apply_update(project, manifest(archive), allow_disruptive=False)
+            finally:
+                UPDATE.fetch_bytes = original_fetch
+            edited = project / '.caps/scripts/example.py'
+            edited.write_text('owner edit after update\n')
+            with self.assertRaisesRegex(RuntimeError, 'rollback_drift'):
+                UPDATE.rollback(project)
+            self.assertEqual(edited.read_text(), 'owner edit after update\n')
+            self.assertEqual((project / '.caps/docs/example.md').read_bytes(), b'new docs\n')
+
+    def test_rollback_refuses_missing_post_update_hashes(self):
+        archive = release_archive()
+        with tempfile.TemporaryDirectory() as temporary:
+            project = self.make_project(Path(temporary))
+            original_fetch = UPDATE.fetch_bytes
+            try:
+                UPDATE.fetch_bytes = lambda _url: archive
+                UPDATE.apply_update(project, manifest(archive), allow_disruptive=False)
+            finally:
+                UPDATE.fetch_bytes = original_fetch
+            status = UPDATE.read_json(UPDATE.status_path(project))
+            status.pop('post_update_hashes', None)
+            UPDATE.atomic_json(UPDATE.status_path(project), status)
+            with self.assertRaisesRegex(RuntimeError, 'rollback_proof_missing'):
+                UPDATE.rollback(project)
+
+    def test_failed_apply_does_not_recover_over_concurrent_owner_edit(self):
+        archive = release_archive()
+        with tempfile.TemporaryDirectory() as temporary:
+            project = self.make_project(Path(temporary))
+            original_fetch, original_copy = UPDATE.fetch_bytes, UPDATE.shutil.copy2
+            edited = project / '.caps/docs/example.md'
+            def fail_after_owner_edit(source, target):
+                source = Path(source)
+                if source.name == 'example.py' and 'unpacked' in source.parts:
+                    edited.write_text('concurrent owner edit\n')
+                    raise OSError('simulated failure')
+                return original_copy(source, target)
+            try:
+                UPDATE.fetch_bytes = lambda _url: archive
+                UPDATE.shutil.copy2 = fail_after_owner_edit
+                result = UPDATE.apply_update(project, manifest(archive), allow_disruptive=False)
+            finally:
+                UPDATE.fetch_bytes, UPDATE.shutil.copy2 = original_fetch, original_copy
+            self.assertEqual(result['blocker'], 'recovery_drift')
+            self.assertFalse(result['rollback_applied'])
+            self.assertEqual(edited.read_text(), 'concurrent owner edit\n')
 
 
 if __name__ == "__main__":

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Evaluate one supplied CAPS model bakeoff without invoking any model."""
+"""Legacy manual supplied-results diagnostic; never run routine benchmarks.
+
+Frozen fixture efforts and historical ranking labels are retained for replay,
+not presented as measured subscription consumption or saved-policy authority.
+"""
 
 from __future__ import annotations
 
@@ -73,9 +77,9 @@ TASKS = (
 )
 
 PUBLIC_FALLBACK = {
-    "transformation": {"model": "gpt-5.6-luna", "thinking": "low"},
-    "coding": {"model": "gpt-5.6-sol", "thinking": "medium"},
-    "proof_review": {"model": "gpt-5.6-sol", "thinking": "high"},
+    "transformation": {"model": "gpt-5.6-luna", "thinking": "max"},
+    "coding": {"model": "gpt-5.6-luna", "thinking": "max"},
+    "proof_review": {"model": "gpt-5.6-luna", "thinking": "max"},
 }
 
 THINKING_BY_TASK_AND_MODEL = {
@@ -277,6 +281,8 @@ def evaluate(payload: object) -> dict:
         "schema_version": "1.0",
         "bakeoff_version": "0.4.0",
         "execution_mode": "evaluate_supplied_results_only",
+        "policy_action": "recommendation_only",
+        "subscription_consumption": "unknown",
         "tasks_digest": manifest["tasks_digest"],
         "traceability": {
             "tasks_digest": manifest["tasks_digest"],

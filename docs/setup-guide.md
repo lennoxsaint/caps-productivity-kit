@@ -7,6 +7,7 @@ This guide installs CAPS into an existing project.
 - A project folder you can edit.
 - Codex or another coding agent that reads `AGENTS.md`.
 - Basic shell access.
+- Python 3.11 or newer (or Python 3.9/3.10 with `tomli` installed).
 
 ## Install
 
@@ -18,6 +19,17 @@ From this kit:
 
 The installer copies prompts, templates, docs, routing schemas, and examples
 into `.caps/`.
+
+A missing `.codex/config.toml` receives Astra Low for new interactive tasks,
+Luna Max for workers, and a six-worker ceiling excluding the lead. Existing
+configs are validated and preserved byte-for-byte. Existing tasks are unchanged.
+For a global Codex directory, use `--config-scope global`; a target named
+`.codex` is detected automatically and uses its direct `config.toml`.
+
+Reinstallation preserves locally modified managed files as declared overrides.
+Replaced managed files and the previous manifest are backed up under
+`.caps/state/install-backups/`. Each write is atomic, but the installation is
+not a whole-directory transaction: inspect the backup after an interrupted run.
 
 It also writes `.caps/bootstrap/start-caps-conductor.md`, the prompt that starts
 the first `CAPS CONDUCTOR` lane inside Codex.
@@ -95,8 +107,8 @@ from `.caps/prompts/workers/` plus a narrow assignment. Each packet names one
 write owner and exact file set. Validate model, thinking, worker kind, and
 `fork_turns` before execution; never silently substitute a capability.
 
-Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
-deterministic, non-colliding lanes. Workers cannot delegate by default;
+Allow at most six concurrent workers per root, excluding the lead, for independent,
+non-colliding lanes. Workers cannot delegate by default;
 owner-requested nested delegation stops at depth two, and Ultra is root-only.
 
 When native thread-control tools are available, `CAPS CONDUCTOR` can create,

@@ -88,10 +88,17 @@ allowed only within the packet. Prohibit external sends, production writes,
 merge, deploy, publish, credential or secret changes, irreversible actions,
 and authority widening. Stop and report before any prohibited action.
 
-Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
-deterministic, non-colliding lanes. Keep coupled work in the conductor.
+Allow at most six workers per root, excluding the lead, for independent,
+non-colliding lanes. Keep coupled work in the conductor.
 
 ## Worker Routing
+
+Default workers to Luna Max. Allow one useful targeted Luna correction, then
+one Sol Extra High attempt, then one separate Astra Medium worker attempt.
+Sol-first requires a recorded reasoning/correctness reason. Stop on exhaustion.
+Unavailable tiers advance with a recorded limitation; missing access, permission,
+infrastructure, or source evidence never triggers model escalation. Preserve
+existing tasks and owner overrides; new interactive defaults are Astra Low.
 
 Keep quick answers, simple clarifications, and tightly coupled work in the
 conductor. Create a worker only for an independent deliverable or proof lane.
@@ -122,7 +129,7 @@ For a native subagent, use `spawn_agent`. For a durable thread, use the separate
 thread control. For example:
 
 ```text
-create_thread({prompt: worker_prompt, model: "gpt-5.6-luna", thinking: "high"})
+create_thread({prompt: worker_prompt, model: "gpt-5.6-luna", thinking: "max"})
 ```
 
 Then title and pin only the validated durable thread. Do not silently
@@ -205,6 +212,7 @@ weaken the quality gate or fabricate an outcome.
 python3 .caps/scripts/routing-receipt.py finish \
   --receipt-id "$receipt_id" --outcome pass \
   --capability-verified --delegation-quality complete \
+  --lead-reviewed --checks-passed --task-check targeted-tests=pass \
   --proof-ref targeted-tests-pass
 ```
 
@@ -215,9 +223,10 @@ result.
 Use canary routes only for deterministic, safely retryable work. Mark them with
 `--route-reason canary` and an experiment id. Never canary external sends,
 production writes, incidents, weakly verifiable research, or other work where a
-failed probe creates material harm. The local reconciler may formalize an
-override only after balanced Luna, Terra, and Sol evidence passes its promotion
-gate; the conductor never edits route policy directly from an individual run.
+failed probe creates material harm. Learning from normal task receipts is
+recommendation-only. No reconciler or conductor automatically promotes saved
+policy; an explicit owner decision and verified rollout are required. Do not
+run routine duplicate benchmarks. Unknown subscription usage remains unknown.
 
 Non-OpenAI models are advisory-only planner, reviewer, or council exceptions.
 Keep them narrow, never use them as the executing worker, and record a specific

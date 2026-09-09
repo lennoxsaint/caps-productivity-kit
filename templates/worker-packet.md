@@ -16,8 +16,8 @@ worker_packet:
     evidence_refs: ["[PUBLIC_OR_LOCAL_REF]"]
     stop_conditions: ["[STOP_AND_REPORT_CONDITION]"]
   route:
-    model: "gpt-5.6-sol"
-    thinking: "medium"
+    model: "gpt-5.6-luna"
+    thinking: "max"
     fork_turns: "none" # none or bounded may override; all must inherit parent route
     capability_snapshot_digest: "sha256:[LIVE_RUNTIME_SNAPSHOT_DIGEST]"
   ownership:

@@ -80,8 +80,9 @@ When the user brain-dumps:
 - Otherwise choose `subagent` by default. Propose a durable worker only when a
   qualifying persistence reason exists, with title, workspace, outcome, stop
   condition, proof requirement, approval gates, and unpin rule.
-- Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
-  deterministic, non-colliding work. Workers cannot delegate by default;
+- Allow at most six workers per root, excluding the lead, for independent,
+  non-colliding work. Default to Luna Max and the approved bounded cascade in
+  `.caps/docs/gpt-5-6-routing.md`. Workers cannot delegate by default;
   owner-requested nested delegation stops at depth two. Ultra is root-only.
 - Before creating or routing multiple lanes, show the proposed split as a
   compact lane tree. Use Mermaid `flowchart TD` by default, SCDiagram when the

@@ -1,13 +1,13 @@
 {
-  "artifact_sha256": "10fcf8728123e8c7aea9d1150141ac601c216f6aa8ab00cd01d60edf48e9d07c",
-  "artifact_url": "https://github.com/lennoxsaint/caps-productivity-kit/releases/download/v0.5.0/caps-productivity-kit-0.5.0.tar.gz",
+  "artifact_sha256": "72114ae41cc8bab14e3001e699f22e0ceebbfee7690683e03f9b0e3172db86e0",
+  "artifact_url": "https://github.com/lennoxsaint/caps-productivity-kit/releases/download/v0.6.0/caps-productivity-kit-0.6.0.tar.gz",
   "channel": "stable",
   "disruptive": false,
   "install_schema_max": "1.0",
   "install_schema_min": "1.0",
   "minimum_updater_version": "0.3.3",
-  "release_notes_url": "https://github.com/lennoxsaint/caps-productivity-kit/releases/tag/v0.5.0",
-  "rollback_version": "0.4.0",
+  "release_notes_url": "https://github.com/lennoxsaint/caps-productivity-kit/releases/tag/v0.6.0",
+  "rollback_version": "0.5.0",
   "schema_version": "1.0",
-  "version": "0.5.0"
+  "version": "0.6.0"
 }

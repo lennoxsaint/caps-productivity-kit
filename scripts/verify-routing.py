@@ -230,17 +230,13 @@ def validate(
             active_workers = 0
         if not isinstance(requested_workers, int) or isinstance(requested_workers, bool) or requested_workers < 0:
             errors.append("fanout.requested_workers must be a non-negative integer")
-        elif requested_workers > 10:
-            errors.append("fanout cannot exceed 10")
+        elif requested_workers > 6:
+            errors.append("fanout cannot exceed 6")
         else:
-            if requested_workers + active_workers > 10:
-                errors.append("total concurrent workers cannot exceed 10")
-            if requested_workers + active_workers > 3 and not request_ref:
-                errors.append("more than three concurrent workers requires an explicit owner request")
+            if requested_workers + active_workers > 6:
+                errors.append("total concurrent workers cannot exceed 6")
             if requested_workers > 0 and not all(fanout.get(field) is True for field in ("independent", "noncolliding")):
                 errors.append("workers require independent, noncolliding lanes")
-            if requested_workers + active_workers > 3 and fanout.get("deterministic") is not True:
-                errors.append("expanded teams require deterministic lanes")
         for field in ("independent", "deterministic", "noncolliding"):
             if not isinstance(fanout.get(field), bool):
                 errors.append(f"fanout.{field} must be boolean")

@@ -45,8 +45,11 @@ Use this order when instructions conflict:
 - Allow local reads, analysis, tests, and declared disjoint reversible edits.
   Prohibit external sends, production writes, merge, deploy, publish,
   credentials, irreversible actions, and authority widening by default.
-- Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for independent,
-  deterministic, non-colliding lanes. Workers cannot delegate by default;
+- Default new interactive tasks to Astra Low and workers to Luna Max; preserve
+  existing tasks and explicit owner choices. Follow the bounded cascade in
+  `docs/gpt-5-6-routing.md`. Learning is recommendation-only.
+- Allow at most six concurrent workers per root, excluding the lead, for independent,
+  non-colliding lanes. Workers cannot delegate by default;
   owner-requested nested delegation stops at depth two. Ultra is root-only.
 - Build capability truth from a fresh, provenance-bearing live runtime catalog
   with `scripts/capability-snapshot.py`; never use a manual or stale list.

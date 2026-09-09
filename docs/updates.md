@@ -66,7 +66,16 @@ A safe apply verifies compatibility and artifact integrity, backs up files it
 will replace, preserves locally modified managed files, and records clear status
 in `.caps/state/update-status.json`. A disruptive release requires explicit
 `--allow-disruptive`. A digest mismatch, incompatible schema, unavailable
-artifact, or interrupted apply leaves the installed release in place.
+artifact, or failed preflight leaves the installed release in place. Managed
+files are replaced atomically. If an apply fails partway through, recovery
+restores this update's files only when their hashes still match. Concurrent
+owner edits stop recovery and are reported with the backup location.
+
+Rollback preflights all affected files against recorded post-update hashes
+before restoring anything. Later owner edits, missing files, or substituted
+symlinks stop it. Older update receipts without those hashes require an inspected
+manual recovery; the new updater does not guess that overwriting is safe.
+Backups cover only the changed files and manifest, not unrelated user state.
 
 The paused `caps-stable-update` Codex automation proposal checks daily and may
 apply only verified, compatible, non-disruptive releases. Installing CAPS copies

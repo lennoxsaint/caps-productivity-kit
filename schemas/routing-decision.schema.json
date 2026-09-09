@@ -235,7 +235,7 @@
         "requested_workers": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 10
+          "maximum": 6
         },
         "independent": {
           "type": "boolean"
@@ -249,7 +249,7 @@
         "active_workers": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 10,
+          "maximum": 6,
           "description": "Other active workers across the entire root task, from a fresh live inventory."
         }
       }

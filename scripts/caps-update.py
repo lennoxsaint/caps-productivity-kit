@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 
-UPDATER_VERSION = "0.4.0"
+UPDATER_VERSION = "0.6.0"
 DEFAULT_CHANNEL_URL = (
     "https://raw.githubusercontent.com/lennoxsaint/"
     "caps-productivity-kit/main/channels/stable.json"
@@ -179,6 +179,20 @@ def check(project: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def atomic_copy(source: Path, target: Path) -> None:
+    """Replace a single managed file without exposing a partial write."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(prefix='.caps-copy-', dir=target.parent)
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        shutil.copy2(source, temporary)
+        os.replace(temporary, target)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
 def restore_backup(caps: Path, backup_root: Path, created: list[str]) -> None:
     for relative in created:
         target = caps / relative
@@ -190,10 +204,10 @@ def restore_backup(caps: Path, backup_root: Path, created: list[str]) -> None:
             if source.is_file():
                 target = caps / source.relative_to(files)
                 target.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source, target)
+                atomic_copy(source, target)
     manifest_backup = backup_root / "install-manifest.json"
     if manifest_backup.exists():
-        shutil.copy2(manifest_backup, caps / "install-manifest.json")
+        atomic_copy(manifest_backup, caps / "install-manifest.json")
 
 
 def apply_update(project: Path, manifest: dict[str, Any], allow_disruptive: bool) -> dict[str, Any]:
@@ -217,6 +231,7 @@ def apply_update(project: Path, manifest: dict[str, Any], allow_disruptive: bool
     updated: list[str] = []
     preserved: list[str] = []
     created: list[str] = []
+    write_hashes: dict[str, str] = {"install-manifest.json": sha256(installed_path)}
 
     with tempfile.TemporaryDirectory(prefix="caps-update-") as temporary_name:
         temporary = Path(temporary_name)
@@ -263,10 +278,12 @@ def apply_update(project: Path, manifest: dict[str, Any], allow_disruptive: bool
                     backup = backup_root / "files" / relative
                     backup.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(target, backup)
+                    write_hashes[relative] = current_hash
                 else:
                     created.append(relative)
                 target.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source, target)
+                atomic_copy(source, target)
+                write_hashes[relative] = source_hash
                 new_hashes[relative] = source_hash
                 updated.append(relative)
 
@@ -280,7 +297,18 @@ def apply_update(project: Path, manifest: dict[str, Any], allow_disruptive: bool
                 "installed_at": datetime.now(timezone.utc).isoformat(),
             }
             atomic_json(installed_path, new_manifest)
+            write_hashes["install-manifest.json"] = sha256(installed_path)
         except OSError as error:
+            drifted = [relative for relative, expected_hash in write_hashes.items()
+                       if not (caps / relative).is_file() or (caps / relative).is_symlink()
+                       or sha256(caps / relative) != expected_hash]
+            drifted.extend(relative for relative in created
+                           if relative not in write_hashes and (caps / relative).exists())
+            if drifted:
+                return write_status(project, status="failed", installed_version=installed.get("version"),
+                                    available_version=manifest["version"], blocker="recovery_drift",
+                                    rollback_applied=False, drifted_files=sorted(set(drifted)),
+                                    backup_dir=str(backup_root))
             restore_backup(caps, backup_root, created)
             return write_status(
                 project,
@@ -299,6 +327,8 @@ def apply_update(project: Path, manifest: dict[str, Any], allow_disruptive: bool
         updated_files=updated,
         created_files=created,
         local_overrides_preserved=preserved,
+        post_update_hashes={relative: sha256(caps / relative)
+                            for relative in [*updated, "install-manifest.json"]},
         release_notes_url=manifest["release_notes_url"],
     )
 
@@ -312,6 +342,23 @@ def rollback(project: Path) -> dict[str, Any]:
     caps = project / ".caps"
     if not backup.is_dir() or caps.resolve() not in backup.resolve().parents:
         raise RuntimeError("invalid_rollback_path")
+    expected = status.get("post_update_hashes")
+    restore_paths = {str(item) for item in status.get("created_files", [])}
+    files = backup / "files"
+    if files.exists():
+        restore_paths.update(str(path.relative_to(files)) for path in files.rglob('*') if path.is_file())
+    restore_paths.add('install-manifest.json')
+    if not isinstance(expected, dict) or not restore_paths <= expected.keys():
+        raise RuntimeError("rollback_proof_missing")
+    # Preflight all targets before touching any file. An owner edit, removal,
+    # or symlink substitution after this update must survive rollback.
+    for relative in sorted(restore_paths):
+        path = Path(relative)
+        target = caps / path
+        if path.is_absolute() or '..' in path.parts or caps.resolve() not in target.resolve().parents:
+            raise RuntimeError("invalid_rollback_target")
+        if target.is_symlink() or not target.is_file() or sha256(target) != expected[relative]:
+            raise RuntimeError(f"rollback_drift:{relative}")
     restore_backup(caps, backup, [str(item) for item in status.get("created_files", [])])
     restored = read_json(caps / "install-manifest.json")
     return write_status(

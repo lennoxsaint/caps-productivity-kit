@@ -4,15 +4,19 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  ./install.sh /path/to/project [--pack pack-name] [--no-open] [--no-agents-update]
+  ./install.sh /path/to/project [--pack pack-name] [--no-open] [--no-agents-update] [--config-scope project|global]
 
 Copies CAPS templates into an existing project.
 
 What it writes:
   AGENTS.md       created or updated with a managed CAPS block unless disabled
   .caps/          prompts, templates, docs, schemas, examples, bootstrap, and selected packs
+  .codex/config.toml  created with safe defaults only when the project config is missing
 
 Existing AGENTS.md files get a timestamped backup before managed block updates.
+Existing Codex configs are validated and preserved byte-for-byte.
+A target named .codex uses config.toml directly; --config-scope can select this
+behavior explicitly for a custom global config directory.
 Packs are copied only when requested with --pack.
 Codex Desktop is opened by default when the `codex` CLI is available.
 USAGE
@@ -32,6 +36,7 @@ fi
 pack_name=""
 open_codex=true
 update_agents=true
+config_scope=auto
 shift || true
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
@@ -51,6 +56,14 @@ while [[ "$#" -gt 0 ]]; do
       update_agents=false
       shift
       ;;
+    --config-scope)
+      config_scope="${2:-}"
+      if [[ "$config_scope" != project && "$config_scope" != global ]]; then
+        echo "--config-scope requires project or global" >&2
+        exit 1
+      fi
+      shift 2
+      ;;
     *)
       echo "Unknown option: $1" >&2
       usage
@@ -67,6 +80,27 @@ fi
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 target_dir="$(cd "$target" && pwd)"
 caps_dir="$target_dir/.caps"
+codex_config_path="$target_dir/.codex/config.toml"
+if [[ "$config_scope" == global || ( "$config_scope" == auto && "$(basename "$target_dir")" == .codex ) ]]; then
+  codex_config_path="$target_dir/config.toml"
+fi
+
+# Validate owner-managed Codex configuration before writing any installation
+# files. A missing project config receives the helper's explicit fresh-install
+# defaults; an existing config is parse-checked only and never upgraded.
+if [[ -L "$codex_config_path" && ! -e "$codex_config_path" ]]; then
+  echo "Codex config symlink target does not exist: $codex_config_path" >&2
+  exit 1
+fi
+if [[ -e "$codex_config_path" || -L "$codex_config_path" ]]; then
+  python3 "$script_dir/scripts/codex-config.py" \
+    --config "$codex_config_path" plan >/dev/null
+  echo "Validated existing Codex config: $codex_config_path"
+else
+  python3 "$script_dir/scripts/codex-config.py" \
+    --config "$codex_config_path" apply --expected-hash missing >/dev/null
+  echo "Created Codex config: $codex_config_path"
+fi
 
 mkdir -p "$caps_dir"
 
@@ -81,34 +115,28 @@ copy_dir() {
   fi
 }
 
-copy_dir "$script_dir/prompts" "$caps_dir/prompts"
-copy_dir "$script_dir/templates" "$caps_dir/templates"
-copy_dir "$script_dir/docs" "$caps_dir/docs"
-copy_dir "$script_dir/schemas" "$caps_dir/schemas"
-copy_dir "$script_dir/examples" "$caps_dir/examples"
-copy_dir "$script_dir/scripts" "$caps_dir/scripts"
-copy_dir "$script_dir/automations" "$caps_dir/automations"
 mkdir -p "$caps_dir/defaults" "$caps_dir/config"
-cp "$script_dir/config/title-preferences.json" "$caps_dir/defaults/title-preferences.json"
 if [[ ! -f "$caps_dir/config/title-preferences.json" ]]; then
   cp "$script_dir/config/title-preferences.json" "$caps_dir/config/title-preferences.json"
   echo "Created title preferences: $caps_dir/config/title-preferences.json"
 else
   echo "Preserved title preferences: $caps_dir/config/title-preferences.json"
 fi
-cp "$script_dir/VERSION" "$caps_dir/VERSION"
 mkdir -p "$caps_dir/bootstrap"
 mkdir -p "$caps_dir/state"
+if [[ ! -e "$caps_dir/state/.gitignore" ]]; then
 cat > "$caps_dir/state/.gitignore" <<'EOF'
 *
 !.gitignore
 EOF
-cp "$script_dir/prompts/bootstrap-caps-conductor.md" "$caps_dir/bootstrap/start-caps-conductor.md"
+fi
 
 python3 - "$caps_dir" "$script_dir" <<'PY'
 import hashlib
+import importlib.util
 import json
 import pathlib
+import shutil
 import sys
 from datetime import datetime, timezone
 
@@ -118,31 +146,56 @@ contract = json.loads((source_root / "scripts/install-contract.json").read_text(
 source_mappings = contract.get("source_mappings")
 if not isinstance(source_mappings, dict):
     raise SystemExit("Invalid installed-file contract source_mappings")
+spec = importlib.util.spec_from_file_location("caps_installer_update", source_root / "scripts/caps-update.py")
+updater = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(updater)
+manifest_path = caps / "install-manifest.json"
+previous = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+expected = previous.get("managed_files", {})
+if not isinstance(expected, dict):
+    raise SystemExit("Invalid existing install manifest")
+backup = caps / "state/install-backups" / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+if manifest_path.exists():
+    backup.mkdir(parents=True, exist_ok=False)
+    shutil.copy2(manifest_path, backup / "install-manifest.json")
 managed = {}
+preserved = []
+
+def install_file(source, relative):
+    target = caps / relative
+    incoming = hashlib.sha256(source.read_bytes()).hexdigest()
+    managed[str(relative)] = incoming
+    if target.exists():
+        current = hashlib.sha256(target.read_bytes()).hexdigest()
+        if current == incoming:
+            return
+        if expected.get(str(relative)) != current:
+            preserved.append(str(relative))
+            return
+        destination = backup / "files" / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(target, destination)
+    updater.atomic_copy(source, target)
+
 for source_name, target_name in source_mappings.items():
     source = source_root / source_name
     if source.is_file():
-        target = caps / target_name
-        managed[target_name] = hashlib.sha256(target.read_bytes()).hexdigest()
+        install_file(source, pathlib.Path(target_name))
         continue
     for source_path in sorted(source.rglob("*")):
         if source_path.is_file() and "__pycache__" not in source_path.parts and source_path.suffix != ".pyc":
             relative = pathlib.Path(target_name) / source_path.relative_to(source)
-            target = caps / relative
-            managed[str(relative)] = hashlib.sha256(target.read_bytes()).hexdigest()
+            install_file(source_path, relative)
 manifest = {
     "schema_version": "1.0",
-    "version": (caps / "VERSION").read_text(encoding="utf-8").strip(),
+    "version": (source_root / "VERSION").read_text(encoding="utf-8").strip(),
     "channel": "stable",
     "source_repository": "https://github.com/lennoxsaint/caps-productivity-kit",
     "managed_files": managed,
-    "local_overrides": [],
+    "local_overrides": sorted(preserved),
     "installed_at": datetime.now(timezone.utc).isoformat(),
 }
-(caps / "install-manifest.json").write_text(
-    json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-    encoding="utf-8",
-)
+updater.atomic_json(manifest_path, manifest)
 PY
 
 if [[ -n "$pack_name" ]]; then

@@ -152,8 +152,8 @@ worktree, ongoing incident, or release. Validate native thread controls before
 creating one; only then title and pin it. A title or pin is coordination
 metadata, never proof of completion.
 
-Start with at most three concurrent workers. Expand only on an explicit owner request, up to ten for
-independent, deterministic, non-colliding lanes. Workers cannot delegate by
+Allow at most six concurrent workers per root, excluding the lead, for
+independent, non-colliding lanes. Six is a ceiling, not a target. Workers cannot delegate by
 default; an explicit packet may permit nested delegation to depth two. Ultra is
 root-only. For mixed-model packets, `fork_turns: none` is the default and full
 history cannot silently override the requested model or authority.
@@ -295,18 +295,22 @@ matrix without third-party dependencies.
 
 MIT. Use it, remix it, ship with it.
 
-## 0.5 routing upgrade
+## Subscription-value routing upgrade
 
-Astra handles demanding end-to-end work while Sol, Terra, and Luna remain
-available for suitable bounded tasks. Main-model selection stays owner-controlled.
-Automatic delegation defaults to three concurrent workers across the root task.
-Larger teams and nesting require an explicit owner request. Terra may collect
-evidence through safe bounded trials before default-route promotion.
+Fresh installs use Astra Low for new interactive tasks and Luna Max for workers.
+Existing tasks and explicit owner settings remain unchanged. After at most one
+useful Luna correction, allow one Sol Extra High attempt, then one separate
+Astra Medium worker attempt. Stop after exhaustion. Unavailable tiers are
+disclosed and skipped; missing access or source evidence does not escalate models.
+Allow at most six workers per root, excluding the lead, with no automatic nesting.
+No claim is made that these defaults are proven cheaper. Subscription consumption
+stays unknown when unavailable; token counts are not allowance savings.
 
 Upgrading retains the existing routing-doc path and receipt schema. Old receipts
-remain readable; their original eligibility checks still apply. The decision
-schema adds optional trial and delegation-request fields and requires explicit
-active-worker counts for new decisions. New spawns follow the new cap; legacy receipts are never rewritten.
+remain readable. Normal-work evidence includes acceptance checks, lead review,
+and later owner corrections. Learning produces recommendations only, never
+automatic policy promotion. New spawns follow the new cap; legacy receipts retain
+their original proof state. See [routing rules](docs/gpt-5-6-routing.md).
 
 Experimental context management is a separate opt-in, never enabled by the
 public installer. Check client/account support and workspace requirements, then
